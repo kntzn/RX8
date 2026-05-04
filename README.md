@@ -15,6 +15,19 @@
     - Renders
     - Img
 
+## gen 8 bring up plan
+1. Bring-up RX MCU
+    1.1. RCC setup
+    1.2. 2xUART config
+    1.3. PPM/PWM config
+2. Bring-up TX MCU
+    2.1. RCC setup
+    2.2. ADC setup
+    2.3. UART setup
+3. Setup comm. proto
+    3.1. SOF + LEN + PLD + CRC
+    3.2. 
+
 ## Bring-up plan
 1. Initialize Clocks
 2. Init Peripherials
