@@ -34,9 +34,4 @@
 3. Test UART/SPI/PPM
 4. Configure DMA
 5. Configure timers
-6. Set up Adressable leds
-
-## FW structure
-Basically:
-- 
-- 
+ 
