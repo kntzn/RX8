@@ -15,10 +15,25 @@
 HAL_FLASH_Program и проверьте, сохранилась ли она после перезагрузки.
 */
 
+#include "stm32f1xx.h"
+
 int main ()
     {
+    uint16_t array [8] = {7, 5, 4, 1, 0, 3, 6, 2};
+    
     while (1) 
         {
-        
+        for (int i = 0; i < 8 - 1; i++)
+        {
+            for (int j = 0; j < 8 - i - 1; j++)
+            {
+                if (array[j] > array[j + 1])
+                {
+                    uint16_t temp = array[j];
+                    array[j] = array[j + 1];
+                    array[j + 1] = temp;
+                }
+            }
+        }
         }
     }

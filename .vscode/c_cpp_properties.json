@@ -1,0 +1,25 @@
+{
+  "configurations": [
+    {
+      "name": "STM32F103",
+      "includePath": [
+        "${workspaceFolder}/src",
+
+        "/home/kntzn/Develop/Common/CMSIS_5-develop/CMSIS/Core/Include",
+        "/home/kntzn/Develop/Common/cmsis-device-f1-master/Include"
+      ],
+
+      "defines": [
+        "STM32F103xB"
+      ],
+
+      "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+
+      "intelliSenseMode": "gcc-arm"
+    }
+  ],
+  "version": 4
+}
