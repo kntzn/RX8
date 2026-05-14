@@ -15,6 +15,10 @@
     - Renders
     - Img
 
+## external dependencies
+[cmsis-device-f1](https://github.com/STMicroelectronics/cmsis-device-f1/tree/master)
+[CMSIS_5](https://github.com/ARM-software/CMSIS_5)
+
 ## gen 8 bring up plan
 1. Bring-up RX MCU
     1.1. RCC setup
