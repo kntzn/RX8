@@ -3,9 +3,9 @@
 # -----------------------------------------------------------
 
 # Компилятор и инструменты
-CC      = arm-none-eabi-gcc
-LD      = arm-none-eabi-gcc
-OBJCOPY = arm-none-eabi-objcopy
+CC      = /usr/bin/arm-none-eabi-gcc
+LD      = /usr/bin/arm-none-eabi-gcc
+OBJCOPY = /usr/bin/arm-none-eabi-objcopy
 
 # MCU и флаги
 MCU     = cortex-m3
@@ -13,15 +13,15 @@ CFLAGS  = -mcpu=$(MCU) -mthumb -Wall -Og -g -ffunction-sections -fdata-sections 
 LDFLAGS = -mcpu=$(MCU) -mthumb -Wl,--gc-sections
 
 # Пути к заголовкам
-INC = -I/home/kntzn/Develop/Common/CMSIS_5-develop/CMSIS/Core/Include \
-	  -I/home/kntzn/Develop/Common/cmsis-device-f1-master/Include \
+INC = -ICore/Include \
+	  -IInclude \
 	  -Isrc \
 
 # Исходники
 SRC = src/main.c \
+	  src/system_stm32f1xx.c \
       startup/startup_stm32f103xb.s \
-	  /home/kntzn/Develop/Common/cmsis-device-f1-master/Source/Templates/system_stm32f1xx.c \
-      
+	  
 # Объектные файлы
 OBJ = $(SRC:.c=.o)
 OBJ := $(OBJ:.s=.o)
