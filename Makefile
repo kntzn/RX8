@@ -57,6 +57,7 @@ flash:
 clean:
 	rm -rf build/*.elf \
 		   build/*.hex \
-		   build/*.bin
+		   build/*.bin \
+		   src/*.o
 
 .PHONY: all clean
