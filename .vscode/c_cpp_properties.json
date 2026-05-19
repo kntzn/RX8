@@ -4,6 +4,7 @@
       "name": "STM32F103",
       "includePath": [
         "${workspaceFolder}/src",
+        "${workspaceFolder}/src/core/event_queue",
 
         "${workspaceFolder}/Core/Include",
         "${workspaceFolder}/Include"

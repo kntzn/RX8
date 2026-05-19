@@ -1,4 +1,5 @@
 #include "stm32f1xx.h"
+#include "evqueue.h"
 
 enum 
 {
@@ -16,4 +17,7 @@ enum
 int main ()
 {
 
+struct event_queue queue;
+
+evqueue_init (&queue);
 }
