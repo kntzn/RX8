@@ -51,7 +51,10 @@ $(TARGET): $(OBJ)
 # Компиляция ASM
 %.o: %.s
 	$(CC) $(CFLAGS) -x assembler-with-cpp -c $< -o $@
-	
+
+local:
+	/usr/bin/gcc-11 src/test.c src/core/event_queue/evqueue.c -Isrc/core/event_queue/ -o build/test_run
+
 flash:
 	st-flash --connect-under-reset write build/firmware.bin 0x8000000
 

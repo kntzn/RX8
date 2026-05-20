@@ -1,6 +1,6 @@
 #include "evqueue.h"
 
-
+static event_queue queue;
 
 void evqueue_init(event_queue *queue)
 {
@@ -49,3 +49,10 @@ event_t evqueue_pop(event_queue *queue)
 
     return (event_t)EMPTY;
 }
+
+#ifdef DEBUG
+event_t* evqueue_dump(event_queue *queue)
+{
+    return (event_t*)queue->array;
+}
+#endif 

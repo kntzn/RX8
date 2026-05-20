@@ -1,5 +1,6 @@
 #include <stdint.h>
 
+#define DEBUG
 #define MAX_QUEUE_SIZE 256
 
 typedef enum 
@@ -21,3 +22,7 @@ void evqueue_init (event_queue *queue);
 uint8_t evqueue_len (event_queue *queue);
 uint8_t evqueue_push (event_queue *queue, event_t event);
 event_t evqueue_pop (event_queue *queue);
+
+#ifdef DEBUG
+event_t* evqueue_dump(event_queue *queue);
+#endif
