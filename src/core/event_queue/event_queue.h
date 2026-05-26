@@ -1,16 +1,11 @@
+#pragma once
+
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <string.h>
 
-#define EVENT_QUEUE_SIZE 32
-
-typedef struct
-{
-    uint16_t head, tail;
-    uint16_t len, max_len_reached;
-    uint16_t* buffer;
-} event_queue;
+#include "core_config.h"
 
 typedef enum
 {
@@ -19,10 +14,38 @@ RESERVED1,
 RESERVED2,
 RESERVED3,
 
-_MAKE_ENUM_16_BIT = 0xFFFF
+// Private
+__EVENT_MAX,
+__MAKE_ENUM_16_BIT = 0xFFFF
 } event_t;
 
-void     event_queue_clear ();
-uint16_t event_queue_len   ();
-bool     event_queue_push  (event_t event);
-event_t  event_queue_pop   ();
+typedef void (*event_handler_t)(event_t event);
+
+/**
+ * @brief Add new event to the queue
+ * @details Should be called on each event to be dispatched
+ * 
+ * @param event Event to be dispatched later
+ * 
+ * @return true on succesfull push, false on overflow
+ */
+bool event_queue_push  (event_t event);
+
+/**
+ * @brief Event dispatcher handler
+ * 
+ * @param count Number of events to be dispatched
+ * @example event_queue_dispatch_event (DEFAULT);
+ * @example event_queue_dispatch_event (5);
+ */
+void event_queue_dispatch_event (uint16_t count);
+
+/**
+ * @brief Registers event handler to selected event type
+ * 
+ * @param event Event id
+ * @param handler Handler function
+ * 
+ * @example event_queue_register_event_handler (RX_PACKET_AVAILABLE, process_packet);
+ */
+bool event_queue_register_event_handler (event_t event, event_handler_t handler);

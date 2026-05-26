@@ -17,12 +17,13 @@ INC = -ICore/Include \
 	  -IInclude \
 	  -Isrc \
 	  -Isrc/core/event_queue \
+	  -Isrc/core/ \
 
 # Исходники
 SRC = src/main.c \
 	  src/system_stm32f1xx.c \
       startup/startup_stm32f103xb.s \
-	  src/core/event_queue/evqueue.c
+	  src/core/event_queue/event_queue.c
 	  
 # Объектные файлы
 OBJ = $(SRC:.c=.o)

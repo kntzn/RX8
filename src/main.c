@@ -1,9 +1,11 @@
 #include "stm32f1xx.h"
-#include "evqueue.h"
+#include "event_queue.h"
 
 int main ()
 {
-event_queue queue;
 
-evqueue_init (&queue);
+    event_t event = NONE;
+    event_queue_push (event);
+    event_queue_dispatch_event (DEFAULT);
+
 }
