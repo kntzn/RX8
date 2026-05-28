@@ -3,23 +3,21 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include <string.h>
 
 #include "core_config.h"
 
 typedef enum
 {
-NONE = 0,
-RESERVED1,
-RESERVED2,
-RESERVED3,
+EVENT_NONE = 0,
+EVENT_RESERVED1,
+EVENT_RESERVED2,
+EVENT_RESERVED3,
 
 // Private
-__EVENT_MAX,
-__MAKE_ENUM_16_BIT = 0xFFFF
+__EVENT_MAX
 } event_t;
 
-typedef void (*event_handler_t)(event_t event);
+typedef void (*event_handler_t)(const event_t event);
 
 /**
  * @brief Add new event to the queue
@@ -34,11 +32,16 @@ bool event_queue_push  (event_t event);
 /**
  * @brief Event dispatcher handler
  * 
- * @param count Number of events to be dispatched
- * @example event_queue_dispatch_event (DEFAULT);
- * @example event_queue_dispatch_event (5);
+ * @param count Number of events to be processed
+ * @example event_queue_dispatch_event (8);
  */
-void event_queue_dispatch_event (uint16_t count);
+void event_queue_dispatch (uint16_t count);
+
+/**
+ * @brief Event dispatcher handler. 
+ * @details processes EVENT_QUEUE_DISPATCH_EVENT_COUNT events
+ */
+void event_queue_dispatch_default ();
 
 /**
  * @brief Registers event handler to selected event type
@@ -49,3 +52,4 @@ void event_queue_dispatch_event (uint16_t count);
  * @example event_queue_register_event_handler (RX_PACKET_AVAILABLE, process_packet);
  */
 bool event_queue_register_event_handler (event_t event, event_handler_t handler);
+
