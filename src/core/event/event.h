@@ -27,7 +27,7 @@ typedef void (*event_handler_t)(const event_t event);
  * 
  * @return true on succesfull push, false on overflow
  */
-bool event_queue_push  (event_t event);
+bool event_push  (event_t event);
 
 /**
  * @brief Event dispatcher handler
@@ -35,13 +35,13 @@ bool event_queue_push  (event_t event);
  * @param count Number of events to be processed
  * @example event_queue_dispatch_event (8);
  */
-void event_queue_dispatch (uint16_t count);
+void event_dispatch (uint16_t count);
 
 /**
  * @brief Event dispatcher handler. 
  * @details processes EVENT_QUEUE_DISPATCH_EVENT_COUNT events
  */
-void event_queue_dispatch_default ();
+void event_dispatch_default ();
 
 /**
  * @brief Registers event handler to selected event type
@@ -51,5 +51,5 @@ void event_queue_dispatch_default ();
  * 
  * @example event_queue_register_event_handler (RX_PACKET_AVAILABLE, process_packet);
  */
-bool event_queue_register_event_handler (event_t event, event_handler_t handler);
+bool event_register_event_handler (event_t event, event_handler_t handler);
 

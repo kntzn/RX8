@@ -1,5 +1,5 @@
 #include "stm32f1xx.h"
-#include "event_queue.h"
+#include "event.h"
 
 int main ()
 {

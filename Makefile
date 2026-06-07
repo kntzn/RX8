@@ -16,7 +16,7 @@ LDFLAGS = -mcpu=$(MCU) -mthumb -Wl,--gc-sections
 INC = -ICore/Include \
 	  -IInclude \
 	  -Isrc \
-	  -Isrc/core/event_queue \
+	  -Isrc/core/event \
 	  -Isrc/core/ \
 
 # Исходники

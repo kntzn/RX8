@@ -8,5 +8,5 @@
 5. traction_control () + safe output
 6. uart DMA + single control packet 
 6.1. COM-TO-UART 
-7. FSM + timeout+failsafe
+7. FSM + timeout+gfailsafe
 8. DWT-profiler

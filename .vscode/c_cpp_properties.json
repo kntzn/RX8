@@ -5,7 +5,7 @@
       "includePath": [
         "${workspaceFolder}/src",
         "${workspaceFolder}/src/core/event_queue",
-        "${workspaceFolder}/src/core/event_manager",
+        "${workspaceFolder}/src/core/event",
         "${workspaceFolder}/src/core",
 
         "${workspaceFolder}/Core/Include",
