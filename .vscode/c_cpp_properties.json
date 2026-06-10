@@ -4,8 +4,11 @@
       "name": "STM32F103",
       "includePath": [
         "${workspaceFolder}/src",
-        "${workspaceFolder}/src/core/event_queue",
+        "${workspaceFolder}/src/core/command_queue",
         "${workspaceFolder}/src/core/event",
+        "${workspaceFolder}/src/core/runtime",
+        "${workspaceFolder}/src/core/scheduler",
+        "${workspaceFolder}/src/core/fsm",
         "${workspaceFolder}/src/core",
 
         "${workspaceFolder}/Core/Include",

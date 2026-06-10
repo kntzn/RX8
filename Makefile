@@ -61,9 +61,6 @@ flash:
 
 # Очистка (не трогаем исходники)
 clean:
-	rm -rf build/*.elf \
-		   build/*.hex \
-		   build/*.bin \
-		   src/*.o
+	find . -type f -name "*.o" -delete
 
 .PHONY: all clean
