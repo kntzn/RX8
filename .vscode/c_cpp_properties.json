@@ -10,6 +10,8 @@
         "${workspaceFolder}/src/core/scheduler",
         "${workspaceFolder}/src/core/fsm",
         "${workspaceFolder}/src/core",
+        "${workspaceFolder}/src/drivers",
+        "${workspaceFolder}/src/mcal/uart",
 
         "${workspaceFolder}/Core/Include",
         "${workspaceFolder}/Include"
