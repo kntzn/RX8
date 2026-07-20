@@ -1,7 +1,6 @@
 #include "command_queue.h"
 
 // ------- Private declarations ------ //
-static void     event_queue_clear ();
 static bool     event_queue_pop (command_t* event);
 
 typedef struct
@@ -85,12 +84,6 @@ void command_queue_dispatch_default ()
 }
 
 // ------- Private defenitions ------- //
-static void event_queue_clear ()
-{
-    queue.head = 0;
-    queue.tail = 0;
-}
-
 static bool event_queue_pop (command_t* event)
 {
     if (queue.head == queue.tail)

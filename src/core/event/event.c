@@ -1,8 +1,7 @@
 #include "event.h"
 
 // ------- Private declarations ------ //
-static void     event_queue_clear ();
-static bool     event_queue_pop (event_t* event);
+static bool     event_pop (event_t* event);
 
 // --------- Private objects --------- //
 static uint64_t event_mask;
@@ -15,7 +14,7 @@ static void default_handler(const event_t event)
 static event_handler_t event_handlers[__EVENT_MAX] = { };
 
 // ------- Public  defenitions ------- //
-bool event_queue_register_event_handler (event_t event, event_handler_t handler)
+bool event_register_event_handler (event_t event, event_handler_t handler)
 {
     if (event >= __EVENT_MAX || 
         handler == NULL || 
@@ -26,17 +25,17 @@ bool event_queue_register_event_handler (event_t event, event_handler_t handler)
     return true;
 }
 
-void event_queue_push (event_t event)
+void event_push (event_t event)
 {
     event_mask |= (1ULL << (uint64_t)event);
 }
 
-void event_queue_dispatch (uint16_t count)
+void event_dispatch (uint16_t count)
 {
     for (int i = 0; i < count; i++)
     {
         event_t event;
-        if (!event_queue_pop (&event))
+        if (!event_pop (&event))
             break;
         
         if (event >= __EVENT_MAX)
@@ -53,12 +52,12 @@ void event_queue_dispatch (uint16_t count)
     }
 }
 
-void event_queue_dispatch_default ()
+void event_dispatch_default ()
 {
     for (int i = 0; i < EVENT_DISPATCH_EVENT_COUNT; i++)
     {
         event_t event;
-        if (!event_queue_pop (&event))
+        if (!event_pop (&event))
             break;
         
         if (event >= __EVENT_MAX)
@@ -76,12 +75,7 @@ void event_queue_dispatch_default ()
 }
 
 // ------- Private defenitions ------- //
-static void event_queue_clear ()
-{
-    event_mask = 0;
-}
-
-static bool event_queue_pop (event_t* event)
+static bool event_pop (event_t* event)
 {
     if (!event_mask)
         return false;

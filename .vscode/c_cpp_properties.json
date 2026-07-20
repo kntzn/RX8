@@ -3,22 +3,11 @@
     {
       "name": "STM32F103",
       "includePath": [
-        "${workspaceFolder}/src",
-        "${workspaceFolder}/src/core/command_queue",
-        "${workspaceFolder}/src/core/event",
-        "${workspaceFolder}/src/core/runtime",
-        "${workspaceFolder}/src/core/scheduler",
-        "${workspaceFolder}/src/core/fsm",
-        "${workspaceFolder}/src/core",
-        "${workspaceFolder}/src/drivers",
-        "${workspaceFolder}/src/mcal/uart",
-
-        "${workspaceFolder}/Core/Include",
-        "${workspaceFolder}/Include"
+        "${workspaceFolder}/**"
       ],
 
       "defines": [
-        "STM32F103xB"
+        "STM32F303xC"
       ],
 
       "compilerPath": "/usr/bin/arm-none-eabi-gcc",

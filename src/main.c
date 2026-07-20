@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include "stm32f303xc.h"
 
 #include "runtime.h"
 

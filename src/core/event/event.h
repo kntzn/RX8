@@ -27,7 +27,7 @@ typedef void (*event_handler_t)(const event_t event);
  * 
  * @return true on succesfull push, false on overflow
  */
-bool event_push  (event_t event);
+void event_push  (event_t event);
 
 /**
  * @brief Event dispatcher handler

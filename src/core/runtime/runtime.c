@@ -1,6 +1,11 @@
+#include <stdbool.h>
+
+#include <stm32f303xc.h>
+
 #include "runtime.h"
 #include "scheduler.h"
 #include "event.h"
+
 
 /**
  * What it should do:
@@ -15,7 +20,7 @@
 
 bool runtime_init()
 {
-    scheduler_init ();
+    return scheduler_init ();
 
     // background init 
     // 

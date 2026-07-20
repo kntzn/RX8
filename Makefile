@@ -8,22 +8,23 @@ LD      = /usr/bin/arm-none-eabi-gcc
 OBJCOPY = /usr/bin/arm-none-eabi-objcopy
 
 # MCU и флаги
-MCU     = cortex-m3
-CFLAGS  = -mcpu=$(MCU) -mthumb -Wall -Og -g -ffunction-sections -fdata-sections -DSTM32F10X_MD -DSTM32F103xB
+MCU     = cortex-m4
+#CFLAGS  = -mcpu=$(MCU) -mthumb -Wall -Og -g -ffunction-sections -fdata-sections -DSTM32F10X_MD -DSTM32F103xB
+CFLAGS  = -mcpu=$(MCU) -mthumb -Wall -Og -g -ffunction-sections -fdata-sections -DSTM32F30X_MD -DSTM32F303xC
 LDFLAGS = -mcpu=$(MCU) -mthumb -Wl,--gc-sections
 
 # Пути к заголовкам
-INC = -ICore/Include \
-	  -IInclude \
-	  -Isrc \
-	  -Isrc/core/event \
-	  -Isrc/core/ \
+INC_DIRS := $(shell find Core/Include Include src -type d 2>/dev/null)
+INC := $(addprefix -I, $(INC_DIRS))
 
 # Исходники
-SRC = src/main.c \
-	  src/system_stm32f1xx.c \
-      startup/startup_stm32f103xb.s \
-	  src/core/event_queue/event_queue.c
+
+# Находит все файлы .c в папке src и её поддиректориях
+SRCS := $(shell find src -type f -name "*.c" 2>/dev/null)
+
+SRC = $(SRCS) \
+      startup/startup_stm32f303xc.s
+	  
 	  
 # Объектные файлы
 OBJ = $(SRC:.c=.o)
@@ -41,7 +42,7 @@ all: $(TARGET)
 # Линковка
 $(TARGET): $(OBJ)
 	@mkdir -p build
-	$(LD) $(LDFLAGS) -Tlinker/STM32F103CB_FLASH.ld -o $@ $^
+	$(LD) $(LDFLAGS) -Tlinker/STM32F303RB_FLASH.ld -o $@ $^
 	$(OBJCOPY) -O ihex $@ build/firmware.hex
 	$(OBJCOPY) -O binary $@ build/firmware.bin
 
@@ -53,8 +54,11 @@ $(TARGET): $(OBJ)
 %.o: %.s
 	$(CC) $(CFLAGS) -x assembler-with-cpp -c $< -o $@
 
-local:
-	/usr/bin/gcc-11 src/test.c src/core/queue.c -Isrc/core/ -o build/test_run
+fondue-flash:
+	echo "Not implemented"
+
+debug:
+	gdb-multiarch build/firmware.elf
 
 flash:
 	st-flash --connect-under-reset write build/firmware.bin 0x8000000
