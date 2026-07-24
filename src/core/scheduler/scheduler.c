@@ -25,7 +25,7 @@ static schedule_t schedules [SCHEDULE_TABLE_SIZE] = {};
 
 bool scheduler_init()
 {
-    return false;
+    return true;
 }
 
 bool scheduler_tick()
