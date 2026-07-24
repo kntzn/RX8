@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include <uart.h>
 
 #include "stm32f303xc.h"
@@ -36,11 +38,31 @@ void uart_read_blocking  (uart_instance_t* uart, uint8_t* buffer, uint32_t len)
 {
     for (uint32_t i = 0; i < len; i++)
     {
-        // Wait for TDR to be ready to receive data
         while (!(uart->ISR & USART_ISR_RXNE));
 
-        // Write byte to TX
         buffer[i] = (uint8_t)uart->RDR;
     }
 
+}
+
+uint8_t uart_read_byte  (uart_instance_t* uart)
+{
+    return (uint8_t)uart->RDR;
+}
+
+bool uart_ready (uart_instance_t* uart)
+{
+    return (bool)(uart->ISR & USART_ISR_RXNE);
+}
+
+void uart_write_byte (uart_instance_t* uart, uint8_t byte)
+{
+    // Wait for TDR to be ready to receive data
+    while (!(uart->ISR & USART_ISR_TXE));
+
+    // Write byte to TX
+    uart->TDR = byte;
+ 
+    // Wait for end of transaction
+    while (!(uart->ISR & USART_ISR_TC));
 }
