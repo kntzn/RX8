@@ -22,41 +22,42 @@ int main ()
 
     dummy();
 
-    uart_instance_t *UART = UART5;
+    uart_instance_t *UART = USART2;
     while (true)
     {
         
 
-        if (uart_ready (UART5))
+        if (uart_ready (UART))
         {
-            uint8_t byte = uart_read_byte (UART5);
+            uint8_t byte = uart_read_byte (UART);
             
             if (byte != 0x7F)
             {
-                uart_write_byte (UART5, byte);
+                uart_write_byte (UART, byte);
                 buffer [idx] = byte;          
                 idx++;
             }
             else
             {
                 idx--;
-                uart_write_blocking (UART5, (uint8_t*)"\b \b", 3);
+                uart_write_blocking (UART, (uint8_t*)"\b \b", 3);
             }
             
 
             if (byte == '\r')
             {
-                uart_write_byte (UART5, '\n');
+                uart_write_byte (UART, '\n');
 
 
-                uart_write_blocking (UART5, buffer, idx);
-                uart_write_byte (UART5, '\n');
+                uart_write_blocking (UART, buffer, idx);
+                uart_write_byte (UART, '\n');
 
                 idx = 0;
             }
-                
+         
 
         }
+        
     }    
     
     //runtime_run_once();    
@@ -70,7 +71,7 @@ static bool application_init (void)
     // ----- Place init functions here ----- //
 
     board_init ();
-    uart_init (UART5, SystemCoreClock, 115200);
+    uart_init (USART2, SystemCoreClock, 115200);
     //uart_init (USART2, SystemCoreClock, 9600);
 
     //if (!runtime_init())
