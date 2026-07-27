@@ -87,5 +87,40 @@ static void board_gpio_init ()
                    (3UL << GPIO_PUPDR_PUPDR10_Pos));
     
 
+    /* PA0 -> GPIO output */
+    GPIOA->MODER &= ~(3UL << GPIO_MODER_MODER0_Pos);
+    GPIOA->MODER |=  (1UL << GPIO_MODER_MODER0_Pos);
+
+    GPIOA->OTYPER &= ~GPIO_OTYPER_OT_0;
+    GPIOA->PUPDR  &= ~(3UL << GPIO_PUPDR_PUPDR0_Pos);
+
+    /* SET = High (normal mode) */
+    GPIOA->BSRR = GPIO_BSRR_BS_0;
+
+}
+
+
+static void board_configure_output (uint32_t port, 
+                                    uint32_t pin,
+                                    uint32_t af,
+                                    uint32_t otype,
+                                    uint32_t pull,
+                                    uint32_t speed)
+{
+    
+}
+
+static void board_configure_input()
+{
+
+}
+
+static void board_configure_af ()
+{
+
+}
+
+static void board_configure_analog()
+{
 
 }

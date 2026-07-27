@@ -7,11 +7,6 @@
 
 static bool application_init (void);
 
-void dummy()
-{
-    
-}
-
 int main ()
 {
     if (!application_init())
@@ -57,8 +52,6 @@ int main ()
 
                 idx = 0;
             }
-         
-
         }
         
     }    
