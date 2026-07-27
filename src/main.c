@@ -15,8 +15,6 @@ int main ()
     uint32_t idx = 0;
     uint8_t buffer [128] = {};
 
-    dummy();
-
     uart_instance_t *UART = USART1;
     uart_instance_t *HC_UART = USART2;
 

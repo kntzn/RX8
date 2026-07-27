@@ -1,10 +1,39 @@
+#include <stdbool.h>
+#include <stddef.h>
 #include <stm32f303xc.h>
 #include <pinmap.h>
 
-static void board_periph_clock_init ();
-static void board_gpio_init ();
+#define INPUT  0U
+#define OUTPUT 1U
+#define AF     2U
+#define ANALOG 3U
 
-void board_init ()
+
+static void board_periph_clock_init (void);
+static void board_gpio_init (void);
+
+static bool board_configure_output (GPIO_TypeDef* port, 
+                                    uint32_t      pin,
+                                    uint32_t      output_type,
+                                    uint32_t      pull_type,
+                                    uint32_t      speed,
+                                    uint32_t      initial_state);
+
+static bool board_configure_input  (GPIO_TypeDef* port, 
+                                    uint32_t      pin,
+                                    uint32_t      pull_type);
+
+static bool board_configure_af     (GPIO_TypeDef *port,
+                                    uint32_t      pin,
+                                    uint32_t      af,
+                                    uint32_t      output_type,
+                                    uint32_t      pull_type,
+                                    uint32_t      speed);
+
+static bool board_configure_analog (GPIO_TypeDef* port, 
+                                    uint32_t      pin);
+
+void board_init (void)
 {
     // clock init
     board_periph_clock_init ();
@@ -16,7 +45,7 @@ void board_init ()
 
 
 
-static void board_periph_clock_init ()
+static void board_periph_clock_init (void)
 {
     RCC->AHBENR |= RCC_AHBENR_GPIOAEN | 
                    RCC_AHBENR_GPIOBEN | 
@@ -30,97 +59,166 @@ static void board_periph_clock_init ()
     (void)RCC->APB2ENR;
 }
 
-static void board_gpio_init ()
+static void board_gpio_init (void)
 {
    /* ---------- USART2 ---------- */
-    /* PA2 -> USART2_TX (AF7) */
-    GPIOA->MODER &= ~(3UL << GPIO_MODER_MODER2_Pos);
-    GPIOA->MODER |=  (2UL << GPIO_MODER_MODER2_Pos);
+    board_configure_af (HC12_UART_PORT, 
+                        HC12_UART_TX_PIN,
+                        HC12_UART_TX_AF,
+                        HC12_UART_TX_OTYPE,
+                        HC12_UART_TX_PULL,
+                        HC12_UART_TX_SPEED);
 
-    /* PA3 -> USART2_RX (AF7) */
-    GPIOA->MODER &= ~(3UL << GPIO_MODER_MODER3_Pos);
-    GPIOA->MODER |=  (2UL << GPIO_MODER_MODER3_Pos);
-
-    /* AF7 */
-    GPIOA->AFR[0] &= ~(0xFUL << GPIO_AFRL_AFRL2_Pos);
-    GPIOA->AFR[0] |=  (7UL   << GPIO_AFRL_AFRL2_Pos);
-
-    GPIOA->AFR[0] &= ~(0xFUL << GPIO_AFRL_AFRL3_Pos);
-    GPIOA->AFR[0] |=  (7UL   << GPIO_AFRL_AFRL3_Pos);
-
-    /* Push-pull, no pull-up/down */
-    GPIOA->OTYPER &= ~(GPIO_OTYPER_OT_2 | GPIO_OTYPER_OT_3);
-    GPIOA->PUPDR  &= ~((3UL << GPIO_PUPDR_PUPDR2_Pos) |
-                    (3UL << GPIO_PUPDR_PUPDR3_Pos));
-
-
-    /* ---------- HC12 SET ---------- */
-    /* PA0 -> GPIO output */
-    GPIOA->MODER &= ~(3UL << GPIO_MODER_MODER0_Pos);
-    GPIOA->MODER |=  (1UL << GPIO_MODER_MODER0_Pos);
-
-    GPIOA->OTYPER &= ~GPIO_OTYPER_OT_0;
-    GPIOA->PUPDR  &= ~(3UL << GPIO_PUPDR_PUPDR0_Pos);
-
-    /* SET = High (normal mode) */
-    GPIOA->BSRR = GPIO_BSRR_BS_0;
-
-
-    /* ---------- USART1 ---------- */
-    /* PA9 -> USART1_TX (AF7) */
-    GPIOA->MODER &= ~(3UL << GPIO_MODER_MODER9_Pos);
-    GPIOA->MODER |=  (2UL << GPIO_MODER_MODER9_Pos);
-
-    GPIOA->AFR[1] &= ~(0xFUL << GPIO_AFRH_AFRH1_Pos);
-    GPIOA->AFR[1] |=  (7UL   << GPIO_AFRH_AFRH1_Pos);
-
-    /* PA10 -> USART1_RX (AF7) */
-    GPIOA->MODER &= ~(3UL << GPIO_MODER_MODER10_Pos);
-    GPIOA->MODER |=  (2UL << GPIO_MODER_MODER10_Pos);
-
-    GPIOA->AFR[1] &= ~(0xFUL << GPIO_AFRH_AFRH2_Pos);
-    GPIOA->AFR[1] |=  (7UL   << GPIO_AFRH_AFRH2_Pos);
-
-    /* Push-pull, no pull-up/down */
-    GPIOA->OTYPER &= ~(GPIO_OTYPER_OT_9 | GPIO_OTYPER_OT_10);
-    GPIOA->PUPDR  &= ~((3UL << GPIO_PUPDR_PUPDR9_Pos) |
-                   (3UL << GPIO_PUPDR_PUPDR10_Pos));
+    board_configure_af (HC12_UART_PORT, 
+                        HC12_UART_RX_PIN,
+                        HC12_UART_RX_AF,
+                        HC12_UART_RX_OTYPE,
+                        HC12_UART_RX_PULL,
+                        HC12_UART_RX_SPEED);
     
+    board_configure_output (HC12_SET_PORT,
+                            HC12_SET_PIN,
+                            HC12_SET_OTYPE,
+                            HC12_SET_PULL,
+                            HC12_SET_SPEED,
+                            HC12_SET_STATE);
 
-    /* PA0 -> GPIO output */
-    GPIOA->MODER &= ~(3UL << GPIO_MODER_MODER0_Pos);
-    GPIOA->MODER |=  (1UL << GPIO_MODER_MODER0_Pos);
+    board_configure_af (CONSOLE_UART_PORT, 
+                        CONSOLE_UART_TX_PIN,
+                        CONSOLE_UART_TX_AF,
+                        CONSOLE_UART_TX_OTYPE,
+                        CONSOLE_UART_TX_PULL,
+                        CONSOLE_UART_TX_SPEED);
 
-    GPIOA->OTYPER &= ~GPIO_OTYPER_OT_0;
-    GPIOA->PUPDR  &= ~(3UL << GPIO_PUPDR_PUPDR0_Pos);
-
-    /* SET = High (normal mode) */
-    GPIOA->BSRR = GPIO_BSRR_BS_0;
-
+    board_configure_af (CONSOLE_UART_PORT, 
+                        CONSOLE_UART_RX_PIN,
+                        CONSOLE_UART_RX_AF,
+                        CONSOLE_UART_RX_OTYPE,
+                        CONSOLE_UART_RX_PULL,
+                        CONSOLE_UART_RX_SPEED);    
 }
 
 
-static void board_configure_output (uint32_t port, 
-                                    uint32_t pin,
-                                    uint32_t af,
-                                    uint32_t otype,
-                                    uint32_t pull,
-                                    uint32_t speed)
+static bool board_configure_output (GPIO_TypeDef* port, 
+                                    uint32_t      pin,
+                                    uint32_t      output_type,
+                                    uint32_t      pull_type,
+                                    uint32_t      speed,
+                                    uint32_t      initial_state)
 {
-    
+    if ((port == NULL)      ||
+        (pin >= 16U)        ||
+        (output_type >= 2U) ||
+        (pull_type >= 3U)   ||
+        (speed >= 4U)       ||
+        (initial_state >= 2U)) 
+    {
+        return false;
+    }
+
+    const uint32_t mode_pos = pin * 2U;
+
+    if (initial_state != 0U)
+        port->BSRR = 1UL << pin;
+    else
+        port->BSRR = 1UL << (pin + 16U);
+
+    port->OTYPER &= ~(1UL << pin);
+    port->OTYPER |=  (output_type << pin);
+
+    port->PUPDR &= ~(3UL << mode_pos);
+    port->PUPDR |=  (pull_type << mode_pos);
+
+    port->OSPEEDR &= ~(3UL << mode_pos);
+    port->OSPEEDR |=  (speed << mode_pos);
+
+    port->MODER &= ~(3UL << mode_pos);
+    port->MODER |=  (OUTPUT << mode_pos);
+
+    return true;
 }
 
-static void board_configure_input()
+static bool board_configure_input  (GPIO_TypeDef* port, 
+                                    uint32_t      pin,
+                                    uint32_t      pull_type)
 {
+    if ((port == NULL)      ||
+        (pin >= 16U)        ||
+        (pull_type >= 3U))
+    {
+        return false;
+    }
 
+    const uint32_t mode_pos = pin * 2U;
+
+    port->PUPDR &= ~(3UL << mode_pos);
+    port->PUPDR |=  (pull_type << mode_pos);
+
+    port->MODER &= ~(3UL   << mode_pos);
+    port->MODER |=  (INPUT << mode_pos);
+
+    return true;
 }
 
-static void board_configure_af ()
+static bool board_configure_af     (GPIO_TypeDef* port,
+                                    uint32_t      pin,
+                                    uint32_t      af,
+                                    uint32_t      output_type,
+                                    uint32_t      pull_type,
+                                    uint32_t      speed)
 {
+    if ((port == NULL)      ||
+        (pin >= 16U)        ||
+        (af >= 16U)         ||
+        (output_type >= 2U) ||
+        (pull_type >= 3U)   ||
+        (speed >= 4U)) 
+    {
+        return false;
+    }
 
+    const uint32_t mode_pos = pin * 2U;
+    const uint32_t af_pos   = (pin % 8U) * 4U;
+    const uint32_t afr_idx  = pin / 8U;
+
+    port->AFR[afr_idx] &= ~(0xFUL << af_pos);
+    port->AFR[afr_idx] |=  (af << af_pos);
+
+    port->OTYPER &= ~(1UL << pin);
+    port->OTYPER |=  (output_type << pin);
+
+    port->PUPDR &= ~(3UL << mode_pos);
+    port->PUPDR |=  (pull_type << mode_pos);
+
+    port->OSPEEDR &= ~(3UL << mode_pos);
+    port->OSPEEDR |=  (speed << mode_pos);
+
+    port->MODER &= ~(3UL << mode_pos);
+    port->MODER |=  (AF << mode_pos);
+
+    return true;
 }
 
-static void board_configure_analog()
+static bool board_configure_analog (GPIO_TypeDef* port, 
+                                    uint32_t      pin)
 {
+    if ((port == NULL) ||
+        (pin >= 16U))
+    {
+        return false;
+    }
 
+    const uint32_t mode_pos = pin * 2U;
+
+    port->PUPDR &= ~(3UL << mode_pos);
+
+    port->MODER &= ~(3UL << mode_pos);
+    port->MODER |=  (ANALOG << mode_pos);
+
+    return true;
 }
+
+#undef INPUT 
+#undef OUTPUT
+#undef AF    
+#undef ANALOG
