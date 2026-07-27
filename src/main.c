@@ -22,11 +22,12 @@ int main ()
 
     dummy();
 
-    uart_instance_t *UART = USART2;
+    uart_instance_t *UART = USART1;
+    uart_instance_t *HC_UART = USART2;
+
     while (true)
     {
         
-
         if (uart_ready (UART))
         {
             uint8_t byte = uart_read_byte (UART);
@@ -52,6 +53,8 @@ int main ()
                 uart_write_blocking (UART, buffer, idx);
                 uart_write_byte (UART, '\n');
 
+                uart_write_blocking (HC_UART, buffer, idx);
+
                 idx = 0;
             }
          
@@ -71,7 +74,8 @@ static bool application_init (void)
     // ----- Place init functions here ----- //
 
     board_init ();
-    uart_init (USART2, SystemCoreClock, 115200);
+    uart_init (USART1, SystemCoreClock, 115200);
+    uart_init (USART2, SystemCoreClock, 9600);
     //uart_init (USART2, SystemCoreClock, 9600);
 
     //if (!runtime_init())

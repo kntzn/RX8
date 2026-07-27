@@ -32,52 +32,60 @@ static void board_periph_clock_init ()
 
 static void board_gpio_init ()
 {
-    // PA2 & PA3 as USART2 (AF7)
-
-    // Set as AF
+   /* ---------- USART2 ---------- */
+    /* PA2 -> USART2_TX (AF7) */
     GPIOA->MODER &= ~(3UL << GPIO_MODER_MODER2_Pos);
     GPIOA->MODER |=  (2UL << GPIO_MODER_MODER2_Pos);
 
+    /* PA3 -> USART2_RX (AF7) */
     GPIOA->MODER &= ~(3UL << GPIO_MODER_MODER3_Pos);
     GPIOA->MODER |=  (2UL << GPIO_MODER_MODER3_Pos);
 
-    // Set AF7
-    GPIOA->AFR[0] &= ~(0xFUL << 8U);
-    GPIOA->AFR[0] |= (7UL << 8U);
-    GPIOA->AFR[0] &= ~(0xFUL << 12U);
-    GPIOA->AFR[0] |= (7UL << 12U);
+    /* AF7 */
+    GPIOA->AFR[0] &= ~(0xFUL << GPIO_AFRL_AFRL2_Pos);
+    GPIOA->AFR[0] |=  (7UL   << GPIO_AFRL_AFRL2_Pos);
+
+    GPIOA->AFR[0] &= ~(0xFUL << GPIO_AFRL_AFRL3_Pos);
+    GPIOA->AFR[0] |=  (7UL   << GPIO_AFRL_AFRL3_Pos);
+
+    /* Push-pull, no pull-up/down */
+    GPIOA->OTYPER &= ~(GPIO_OTYPER_OT_2 | GPIO_OTYPER_OT_3);
+    GPIOA->PUPDR  &= ~((3UL << GPIO_PUPDR_PUPDR2_Pos) |
+                    (3UL << GPIO_PUPDR_PUPDR3_Pos));
+
+
+    /* ---------- HC12 SET ---------- */
+    /* PA0 -> GPIO output */
+    GPIOA->MODER &= ~(3UL << GPIO_MODER_MODER0_Pos);
+    GPIOA->MODER |=  (1UL << GPIO_MODER_MODER0_Pos);
+
+    GPIOA->OTYPER &= ~GPIO_OTYPER_OT_0;
+    GPIOA->PUPDR  &= ~(3UL << GPIO_PUPDR_PUPDR0_Pos);
+
+    /* SET = High (normal mode) */
+    GPIOA->BSRR = GPIO_BSRR_BS_0;
+
+
+    /* ---------- USART1 ---------- */
+    /* PA9 -> USART1_TX (AF7) */
+    GPIOA->MODER &= ~(3UL << GPIO_MODER_MODER9_Pos);
+    GPIOA->MODER |=  (2UL << GPIO_MODER_MODER9_Pos);
+
+    GPIOA->AFR[1] &= ~(0xFUL << GPIO_AFRH_AFRH1_Pos);
+    GPIOA->AFR[1] |=  (7UL   << GPIO_AFRH_AFRH1_Pos);
+
+    /* PA10 -> USART1_RX (AF7) */
+    GPIOA->MODER &= ~(3UL << GPIO_MODER_MODER10_Pos);
+    GPIOA->MODER |=  (2UL << GPIO_MODER_MODER10_Pos);
+
+    GPIOA->AFR[1] &= ~(0xFUL << GPIO_AFRH_AFRH2_Pos);
+    GPIOA->AFR[1] |=  (7UL   << GPIO_AFRH_AFRH2_Pos);
+
+    /* Push-pull, no pull-up/down */
+    GPIOA->OTYPER &= ~(GPIO_OTYPER_OT_9 | GPIO_OTYPER_OT_10);
+    GPIOA->PUPDR  &= ~((3UL << GPIO_PUPDR_PUPDR9_Pos) |
+                   (3UL << GPIO_PUPDR_PUPDR10_Pos));
     
-    // Clear push-pull
-    GPIOA->OTYPER &= ~(1UL << 3U);
-    GPIOA->PUPDR  &= ~(3UL << 6U);
-    GPIOA->OTYPER &= ~(1UL << 2U);
-    GPIOA->PUPDR  &= ~(3UL << 4U);
 
-    
-    // PB3 is configured as general output
-    GPIOB->MODER &= ~(3UL << GPIO_MODER_MODER3_Pos);
-    GPIOB->MODER |=  (1UL << GPIO_MODER_MODER3_Pos);
-    GPIOB->OTYPER &= ~(1UL << 3U);
-    GPIOB->PUPDR  &= ~(3UL << 6U);
 
-    GPIOB->BSRR = GPIO_BSRR_BS_3;
-
-    /*
-    // PA14 + PA15 as UART2
-    GPIOA->MODER &= ~(3UL << GPIO_MODER_MODER14_Pos);
-    GPIOA->MODER |=  (2UL << GPIO_MODER_MODER14_Pos);
-
-    GPIOA->MODER &= ~(3UL << GPIO_MODER_MODER15_Pos);
-    GPIOA->MODER |=  (2UL << GPIO_MODER_MODER15_Pos);
-
-    GPIOA->AFR[1] &= ~(0xFUL << 28U);
-    GPIOA->AFR[1] |= (5UL << 28U);
-    GPIOA->AFR[1] &= ~(0xFUL << 24U);
-    GPIOA->AFR[1] |= (5UL << 24U);
-    
-    GPIOA->OTYPER &= ~(1UL << 14U);
-    GPIOA->PUPDR  &= ~(3UL << 28U);
-    GPIOA->OTYPER &= ~(1UL << 15U);
-    GPIOA->PUPDR  &= ~(3UL << 30U);
- */
 }
