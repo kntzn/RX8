@@ -3,10 +3,10 @@
 #include <stm32f303xc.h>
 #include <pinmap.h>
 
-#define INPUT  0U
-#define OUTPUT 1U
-#define AF     2U
-#define ANALOG 3U
+#define BOARD_GPIO_INPUT  0U
+#define BOARD_GPIO_OUTPUT 1U
+#define BOARD_GPIO_AF     2U
+#define BOARD_GPIO_ANALOG 3U
 
 
 static void board_periph_clock_init (void);
@@ -36,14 +36,15 @@ static bool board_configure_analog (GPIO_TypeDef* port,
 void board_init (void)
 {
     // clock init
-    board_periph_clock_init ();
+    // TODO
+
     // periph clock init
+    board_periph_clock_init ();
+    
 
     // gpio init
     board_gpio_init ();
 }
-
-
 
 static void board_periph_clock_init (void)
 {
@@ -61,7 +62,29 @@ static void board_periph_clock_init (void)
 
 static void board_gpio_init (void)
 {
-   /* ---------- USART2 ---------- */
+    /* --------- DBG PINS --------- */
+    board_configure_output (DEBUG_PIN0_PORT,
+                            DEBUG_PIN0_PIN,
+                            DEBUG_PIN0_OTYPE,
+                            DEBUG_PIN0_PULL,
+                            DEBUG_PIN0_SPEED,
+                            DEBUG_PIN0_STATE);
+
+    board_configure_output (DEBUG_PIN1_PORT,
+                            DEBUG_PIN1_PIN,
+                            DEBUG_PIN1_OTYPE,
+                            DEBUG_PIN1_PULL,
+                            DEBUG_PIN1_SPEED,
+                            DEBUG_PIN1_STATE);
+
+    board_configure_output (DEBUG_PIN2_PORT,
+                            DEBUG_PIN2_PIN,
+                            DEBUG_PIN2_OTYPE,
+                            DEBUG_PIN2_PULL,
+                            DEBUG_PIN2_SPEED,
+                            DEBUG_PIN2_STATE);
+
+   /* ----------  HC-12 ---------- */
     board_configure_af (HC12_UART_PORT, 
                         HC12_UART_TX_PIN,
                         HC12_UART_TX_AF,
@@ -83,6 +106,7 @@ static void board_gpio_init (void)
                             HC12_SET_SPEED,
                             HC12_SET_STATE);
 
+    /* ---------- CONSOLE --------- */
     board_configure_af (CONSOLE_UART_PORT, 
                         CONSOLE_UART_TX_PIN,
                         CONSOLE_UART_TX_AF,
@@ -96,8 +120,9 @@ static void board_gpio_init (void)
                         CONSOLE_UART_RX_OTYPE,
                         CONSOLE_UART_RX_PULL,
                         CONSOLE_UART_RX_SPEED);    
-}
 
+    
+}
 
 static bool board_configure_output (GPIO_TypeDef* port, 
                                     uint32_t      pin,
@@ -133,7 +158,7 @@ static bool board_configure_output (GPIO_TypeDef* port,
     port->OSPEEDR |=  (speed << mode_pos);
 
     port->MODER &= ~(3UL << mode_pos);
-    port->MODER |=  (OUTPUT << mode_pos);
+    port->MODER |=  (BOARD_GPIO_OUTPUT << mode_pos);
 
     return true;
 }
@@ -155,7 +180,7 @@ static bool board_configure_input  (GPIO_TypeDef* port,
     port->PUPDR |=  (pull_type << mode_pos);
 
     port->MODER &= ~(3UL   << mode_pos);
-    port->MODER |=  (INPUT << mode_pos);
+    port->MODER |=  (BOARD_GPIO_INPUT << mode_pos);
 
     return true;
 }
@@ -194,7 +219,7 @@ static bool board_configure_af     (GPIO_TypeDef* port,
     port->OSPEEDR |=  (speed << mode_pos);
 
     port->MODER &= ~(3UL << mode_pos);
-    port->MODER |=  (AF << mode_pos);
+    port->MODER |=  (BOARD_GPIO_AF << mode_pos);
 
     return true;
 }
@@ -213,12 +238,7 @@ static bool board_configure_analog (GPIO_TypeDef* port,
     port->PUPDR &= ~(3UL << mode_pos);
 
     port->MODER &= ~(3UL << mode_pos);
-    port->MODER |=  (ANALOG << mode_pos);
+    port->MODER |=  (BOARD_GPIO_ANALOG << mode_pos);
 
     return true;
 }
-
-#undef INPUT 
-#undef OUTPUT
-#undef AF    
-#undef ANALOG

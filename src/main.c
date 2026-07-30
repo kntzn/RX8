@@ -1,9 +1,12 @@
 #include <stdbool.h>
-#include "stm32f303xc.h"
+#include <stm32f303xc.h>
 
 #include "runtime.h"
 #include "uart.h"
 #include "board.h"
+#include "hc12.h"
+#include "gpio.h"
+#include "pinmap.h"
 
 static bool application_init (void);
 
@@ -20,7 +23,6 @@ int main ()
 
     while (true)
     {
-        
         if (uart_ready (UART))
         {
             uint8_t byte = uart_read_byte (UART);
@@ -51,7 +53,6 @@ int main ()
                 idx = 0;
             }
         }
-        
     }    
     
     //runtime_run_once();    
@@ -59,14 +60,22 @@ int main ()
     return 0;
 }
 
+
 static bool application_init (void)
 {
     __disable_irq();
     // ----- Place init functions here ----- //
 
     board_init ();
+
     uart_init (USART1, SystemCoreClock, 115200);
-    uart_init (USART2, SystemCoreClock, 9600);
+    uart_init (HC12_UART_INSTANCE, SystemCoreClock, 9600);
+
+    gpio_t HC12_set = { HC12_SET_PORT, HC12_SET_PIN };
+    hc12_t HC12     = { HC12_UART_INSTANCE, &HC12_set };
+
+    hc12_init (&HC12);
+
     //uart_init (USART2, SystemCoreClock, 9600);
 
     //if (!runtime_init())
