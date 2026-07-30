@@ -1,7 +1,10 @@
 #include "hc12.h"
 #include "uart.h"
 
-bool hc12_init()
+
+void hc12_init (hc12_t* self, uart_instance_t* usart, gpio_t* set)
 {
-    return false;
+    (void)self;
+    (void)usart; // TODO
+    (void)set;
 }

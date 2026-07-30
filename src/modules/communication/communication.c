@@ -22,5 +22,5 @@ typedef enum
 
 bool communication_init()
 {
-    return hc12_init ();
+    return true; //return hc12_init ();
 }

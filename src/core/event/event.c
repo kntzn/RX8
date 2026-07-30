@@ -9,6 +9,7 @@ static uint64_t event_mask;
 static void default_handler(const event_t event) 
 {
     // TODO: handle failed events
+    (void)event;
 }
 
 static event_handler_t event_handlers[__EVENT_MAX] = { };

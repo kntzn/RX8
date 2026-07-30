@@ -23,6 +23,7 @@ static command_queue_t queue =
 
 static void default_handler(const command_t event) 
 {
+    (void)event;
     // TODO: handle failed events
     // TODO: Trace
 }

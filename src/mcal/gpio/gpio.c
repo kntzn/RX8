@@ -117,17 +117,19 @@ bool gpio_analog_init (gpio_t* self, GPIO_TypeDef* port, uint32_t pin)
 
 gpio_state_t gpio_read (const gpio_t* self)
 {
-
+    (void)self; // TODO
+    return GPIO_STATE_LOW;
 }
 
 void gpio_write (const gpio_t* self, gpio_state_t level)
 {
-    
+    (void)self; // TODO
+    (void)level;
 }
 
 void gpio_toggle (const gpio_t* self)
 {
-    
+    (void)self; // TODO
 }
 
 // ---------- Private Defenitions ---------- //
