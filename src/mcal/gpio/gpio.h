@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -34,6 +36,14 @@ typedef enum
     GPIO_STATE_LOW = 0,
     GPIO_STATE_HIGH
 } gpio_state_t;
+
+typedef enum 
+{
+    GPIO_PIN_FUNCTION_INPUT = 0,
+    GPIO_PIN_FUNCTION_OUTPUT,
+    GPIO_PIN_FUNCTION_AF,
+    GPIO_PIN_FUNCTION_ANALOG
+} gpio_pin_function_t;
 
 bool gpio_input_init           (gpio_t*            self,
                                 GPIO_TypeDef*      port,

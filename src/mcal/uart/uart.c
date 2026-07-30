@@ -66,3 +66,47 @@ void uart_write_byte (uart_instance_t* uart, uint8_t byte)
     // Wait for end of transaction
     while (!(uart->ISR & USART_ISR_TC));
 }
+
+void uart_irq_handler (USART_TypeDef* uart)
+{
+    if ((uart->ISR & USART_ISR_RXNE) != 0u) 
+    {
+        uint8_t byte = (uint8_t)uart->RDR;
+        uart_rx_push_isr(uart, byte);
+    }
+
+    if (((uart->ISR & USART_ISR_TXE) != 0u) &&
+        ((uart->CR1 & USART_CR1_TXEIE) != 0u)) 
+        {
+        uart_tx_process_isr(uart);
+        }
+
+    if ((uart->ISR & USART_ISR_ORE) != 0u) 
+        {
+        uart->ICR = USART_ICR_ORECF;
+        }
+}
+
+void USART1_IRQHandler ()
+{
+    uart_irq_handler(USART1);
+}
+
+void USART2_IRQHandler ()
+{
+    uart_irq_handler(USART2);
+}
+
+void USART3_IRQHandler ()
+{
+    uart_irq_handler(USART3);
+}
+
+void UART4_IRQHandler ()
+{
+    uart_irq_handler(UART4);
+}
+void UART5_IRQHandler ()
+{
+    uart_irq_handler(UART5);
+}
