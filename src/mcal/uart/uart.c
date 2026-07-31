@@ -67,8 +67,10 @@ void uart_write_byte (uart_instance_t* self, uint8_t byte)
     while (!(self->instance->ISR & USART_ISR_TC));
 }
 
-void uart_irq_handler (USART_TypeDef* stm_uart)
+uart_irq_event_t uart_irq_handler (USART_TypeDef* stm_uart)
 {
+    uart_irq_event_t event_mask;
+
     // For now!!! // TODO: uart_instance_t getInstance (USART_TypeDef* self){}
     uart_instance_t* uart = (uart_instance_t*)stm_uart;
 
@@ -77,16 +79,23 @@ void uart_irq_handler (USART_TypeDef* stm_uart)
         uint8_t byte = (uint8_t)uart->instance->RDR;
         //uart_rx_push_isr(uart, byte);
     (void)byte;
+
+        event_mask |= UART_IRQ_EVENT_RX_AVAIL;
     }
 
     if (((uart->instance->ISR & USART_ISR_TXE) != 0u) &&
         ((uart->instance->CR1 & USART_CR1_TXEIE) != 0u)) 
         {
         //uart_tx_process_isr(uart);
+
+        event_mask |= UART_IRQ_EVENT_TX_READY;
         }
 
     // if ((uart->instance->ISR & USART_ISR_ORE) != 0u) 
-        // {
+    // {
         // uart->instance->ICR = USART_ICR_ORECF;
-        // }
+        //event_mask |= UART_IRQ_EVENT_ERROR;
+    // }
+
+    return event_mask;
 }

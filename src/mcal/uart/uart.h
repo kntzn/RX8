@@ -5,7 +5,12 @@
 
 #include <stm32f303xc.h>
 
-
+typedef enum
+{
+    UART_IRQ_EVENT_RX_AVAIL = 1U << 0,
+    UART_IRQ_EVENT_TX_READY = 1U << 1,
+    UART_IRQ_EVENT_ERROR    = 1U << 2
+} uart_irq_event_t;
 
 typedef struct
 {
