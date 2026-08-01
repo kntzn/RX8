@@ -54,8 +54,19 @@ $(TARGET): $(OBJ)
 %.o: %.s
 	$(CC) $(CFLAGS) -x assembler-with-cpp -c $< -o $@
 
-fondue-flash:
-	echo "Not implemented"
+flash-lab:
+	scp build/firmware* lab01:~/Develop/RX8/build
+	ssh lab01 st-flash --connect-under-reset write ~/Develop/RX8/build/firmware.bin 0x8000000
+	#
+
+debug-lab:
+	scp build/firmware* lab01:~/Develop/RX8/build
+	#ssh lab01 openocd -f interface/stlink.cfg -f target/stm32f3x.cfg -c "program /home/kntzn/Develop/RX8/build/firmware.hex verify reset exit"
+	ssh lab01 st-flash --connect-under-reset write ~/Develop/RX8/build/firmware.bin 0x8000000
+	ssh lab01 openocd -f interface/stlink.cfg -f target/stm32f3x.cfg
+
+console-lab:
+	ssh -tt lab01 picocom -b 115200 /dev/ttyUSB0
 
 debug:
 	gdb-multiarch build/firmware.elf
@@ -63,7 +74,6 @@ debug:
 flash:
 	st-flash --connect-under-reset write build/firmware.bin 0x8000000
 
-# Очистка (не трогаем исходники)
 clean:
 	find . -type f -name "*.o" -delete
 
