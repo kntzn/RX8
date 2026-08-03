@@ -16,14 +16,18 @@ typedef struct
 {
     USART_TypeDef* instance;
 
-    // context
+    uart_irq_event_t events;
+    // context (buffers etc)
+
+    // TODO:
+    // buffer rx / tx
+    // counter rx / tx
+    // irq_mode_rx None/IRQ/DMA
+    // irq_mode_tx None/IRQ/DMA
 
 } uart_instance_t;
 
-
-//typedef USART_TypeDef uart_instance_t;
-
-void uart_init (uart_instance_t* self, USART_TypeDef* uart, uint32_t clock_freq, uint32_t baudrate);
+bool uart_init (uart_instance_t* self, USART_TypeDef* uart, uint32_t clock_freq, uint32_t baudrate);
 
 void uart_write_blocking (uart_instance_t* self, uint8_t* buffer, uint32_t len);
 void uart_read_blocking  (uart_instance_t* self, uint8_t* buffer, uint32_t len);
@@ -32,4 +36,4 @@ uint8_t uart_read_byte  (uart_instance_t* self);
 bool uart_ready (uart_instance_t* self);
 void uart_write_byte (uart_instance_t* self, uint8_t byte);
 
-uart_irq_event_t uart_irq_handler (USART_TypeDef* stm_uart);
+void uart_irq_handler (USART_TypeDef* stm_uart);

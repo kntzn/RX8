@@ -54,15 +54,17 @@ $(TARGET): $(OBJ)
 %.o: %.s
 	$(CC) $(CFLAGS) -x assembler-with-cpp -c $< -o $@
 
+size:
+	arm-none-eabi-size build/firmware.elf -A
+
 flash-lab:
 	scp build/firmware* lab01:~/Develop/RX8/build
-	ssh lab01 st-flash --connect-under-reset write ~/Develop/RX8/build/firmware.bin 0x8000000
-	#
+	ssh lab01 st-flash --connect-under-reset write Develop/RX8/build/firmware.bin 0x8000000
 
 debug-lab:
 	scp build/firmware* lab01:~/Develop/RX8/build
 	#ssh lab01 openocd -f interface/stlink.cfg -f target/stm32f3x.cfg -c "program /home/kntzn/Develop/RX8/build/firmware.hex verify reset exit"
-	ssh lab01 st-flash --connect-under-reset write ~/Develop/RX8/build/firmware.bin 0x8000000
+	ssh lab01 st-flash --connect-under-reset write Develop/RX8/build/firmware.bin 0x8000000
 	ssh lab01 openocd -f interface/stlink.cfg -f target/stm32f3x.cfg
 
 console-lab:
