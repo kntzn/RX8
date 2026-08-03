@@ -69,7 +69,7 @@ void uart_write_byte (uart_instance_t* self, uint8_t byte)
 
 uart_irq_event_t uart_irq_handler (USART_TypeDef* stm_uart)
 {
-    uart_irq_event_t event_mask;
+    uart_irq_event_t event_mask = 0;
 
     // For now!!! // TODO: uart_instance_t getInstance (USART_TypeDef* self){}
     uart_instance_t* uart = (uart_instance_t*)stm_uart;

@@ -31,3 +31,5 @@ void uart_read_blocking  (uart_instance_t* self, uint8_t* buffer, uint32_t len);
 uint8_t uart_read_byte  (uart_instance_t* self);
 bool uart_ready (uart_instance_t* self);
 void uart_write_byte (uart_instance_t* self, uint8_t byte);
+
+uart_irq_event_t uart_irq_handler (USART_TypeDef* stm_uart);

@@ -20,7 +20,11 @@ typedef enum
     IRQ_EVENT_ = 1UL << 15
 } irq_event_t;
 
-void irq_manager_register_callback ();
+
 
 void irq_manager_raise (irq_event_t event);
 //void irq_manager_raise_spi (spi_irq_event_t event);
+
+//void irq_manager_register_callback ();
+
+//void irq_manager_dispatch ();

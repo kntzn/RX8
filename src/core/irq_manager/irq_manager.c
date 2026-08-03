@@ -4,9 +4,10 @@
 
 typedef uint64_t irq_event_mask;
 
+static irq_event_mask events;
 
-
-void irq_manager_raise_uart (uart_irq_event_t event)
+void irq_manager_raise (irq_event_t event)
 {
-    UART_IRQ_EVENT_TX_READY;
+    events |= event;
 }
+
