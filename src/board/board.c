@@ -27,3 +27,6 @@ static void board_periph_clock_init (void)
     (void)RCC->APB1ENR;
     (void)RCC->APB2ENR;
 }
+
+void board_assert_failed_exception(){}
+void board_not_implemented_exception(){}

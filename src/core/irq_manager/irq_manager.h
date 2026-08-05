@@ -25,7 +25,7 @@ typedef enum
 
 void irq_manager_init ();
 
-bool irq_manager_register_callback (irq_event_t event, void* callback);
+bool irq_manager_register_callback (irq_event_t event, void* callback, void* ctx);
 
 void irq_manager_raise (irq_event_t event);
 
