@@ -181,13 +181,13 @@ void uart_process_tx_isr (uart_instance_t* self)
     if (self->tx_head != self->tx_tail)
     {
         self->instance->TDR = self->tx_buffer [self->tx_head];
-        self->tx_head = (self->tx_head+1)/(UART_BUFFER_SIZE-1);
+        self->tx_head = (self->tx_head+1)&(UART_BUFFER_SIZE-1);
     }
 }
 
 void uart_process_rx_isr (uart_instance_t* self)
 {
-    uint16_t next_tail = (self->rx_tail+1)/(UART_BUFFER_SIZE-1);
+    uint16_t next_tail = (self->rx_tail+1)&(UART_BUFFER_SIZE-1);
 
     if (self->rx_head != next_tail)
     {
