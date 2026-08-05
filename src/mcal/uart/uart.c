@@ -79,7 +79,7 @@ void uart_write_byte (uart_instance_t* self, uint8_t byte)
     while (!(self->instance->ISR & USART_ISR_TC));
 }
 
-void uart_irq_handler (USART_TypeDef* stm_uart)
+bool uart_irq_handler (USART_TypeDef* stm_uart)
 {
     uart_instance_t* uart = uart_get_instance_by_uart (stm_uart);
 
@@ -107,13 +107,20 @@ void uart_irq_handler (USART_TypeDef* stm_uart)
         // uart->instance->ICR = USART_ICR_ORECF;
         //events |= UART_IRQ_EVENT_ERROR;
     // }
+    
+    return uart->events != UART_IRQ_EVENT_NONE;
 }
 
 bool uart_register_instance (uart_instance_t* self, USART_TypeDef* uart)
 {
     // Save ptrs to instance and stm uart regs structure
     for (uint8_t idx = 0; idx < USART_INSTANCE_COUNT; idx++)
-    {
+    { 
+        // Already registered
+        if (usart_table    [idx] == uart)
+            return true;
+
+        // Successfully registered
         if (instance_table [idx] == NULL &&
             usart_table    [idx] == NULL)
         {
@@ -125,6 +132,7 @@ bool uart_register_instance (uart_instance_t* self, USART_TypeDef* uart)
         
     }
 
+    // Out of space in table
     return false;
 }
 
@@ -138,6 +146,19 @@ uart_instance_t* uart_get_instance_by_uart (USART_TypeDef* stm_uart)
     }
 
     return NULL;
+}
+
+uart_irq_event_t uart_take_events (uart_instance_t* self)
+{
+    uart_irq_event_t event_mask;
+
+    IRQ_LOCK
+        {
+        event_mask = self->events;
+        self->events = UART_IRQ_EVENT_NONE;
+        }
+
+    return event_mask;
 }
 
 #undef USART_INSTANCE_COUNT
