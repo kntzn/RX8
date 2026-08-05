@@ -10,12 +10,9 @@
 #include "hc12.h"
 #include "console.h"
 #include "irq_manager.h"
+#include "debug.h"
 
 static bool application_init (void);
-
-// TODO!!!!
-static uart_instance_t hc12_uart;
-static uart_instance_t console_uart;
 
 int main ()
 {
@@ -43,7 +40,8 @@ static bool application_init (void)
     static gpio_t hc12_set;
     static hc12_t hc12;
     static console_t console;
-
+    static uart_instance_t hc12_uart;
+    static uart_instance_t console_uart;
 
     __disable_irq();
     // ----- Place init functions here ----- //

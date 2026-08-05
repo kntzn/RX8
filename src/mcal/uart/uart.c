@@ -6,6 +6,7 @@
 #include "board.h"
 #include "uart.h"
 #include "utils.h"
+#include "debug.h"
 
 #define USART_INSTANCE_COUNT 5
 
@@ -98,13 +99,15 @@ bool uart_irq_handler (USART_TypeDef* stm_uart)
 {
     uart_instance_t* uart = uart_get_instance_by_uart (stm_uart);
 
-    board_assert (uart != NULL);
+    uart_irq_event_t raised_events = UART_IRQ_EVENT_NONE;
+
+    debug_assert (uart != NULL);
     
     if ((uart->instance->ISR & USART_ISR_RXNE) != 0u) 
     {
         uart_process_rx_isr(uart);
         
-        uart->events |= UART_IRQ_EVENT_RX_AVAIL;
+        raised_events |= UART_IRQ_EVENT_RX_AVAIL;
     }
 
     if (((uart->instance->ISR & USART_ISR_TXE) != 0u) &&
@@ -112,18 +115,20 @@ bool uart_irq_handler (USART_TypeDef* stm_uart)
         {
         uart_process_tx_isr(uart);
 
-        uart->events |= UART_IRQ_EVENT_TX_READY;
+        raised_events |= UART_IRQ_EVENT_TX_READY;
         }
 
 
-    // if ((uart->instance->ISR & USART_ISR_ORE) != 0u) 
-    // {
-        // uart->instance->ICR = USART_ICR_ORECF;
-        //events |= UART_IRQ_EVENT_ERROR;
-    // }
-    
+    if ((uart->instance->ISR & USART_ISR_ORE) != 0u) 
+    {
+        uart->instance->ICR = USART_ICR_ORECF;
+        raised_events |= UART_IRQ_EVENT_ERROR;
 
-    return uart->events != UART_IRQ_EVENT_NONE;
+        debug_raise_fault (FAULT_UART_OVERRUN);
+    }
+    
+    uart->events |= raised_events;
+    return raised_events != UART_IRQ_EVENT_NONE;
 }
 
 bool uart_register_instance (uart_instance_t* self, USART_TypeDef* uart)
