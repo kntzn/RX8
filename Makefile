@@ -23,7 +23,8 @@ INC := $(addprefix -I, $(INC_DIRS))
 SRCS := $(shell find src -type f -name "*.c" 2>/dev/null)
 
 SRC = $(SRCS) \
-      startup/startup_stm32f303xc.s
+      startup/startup_stm32f303xc.s \
+	  startup/isr.c
 	  
 	  
 # Объектные файлы

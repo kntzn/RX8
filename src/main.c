@@ -8,6 +8,7 @@
 #include "gpio.h"
 #include "pinmap.h"
 #include "hc12.h"
+#include "console.h"
 #include "irq_manager.h"
 
 static bool application_init (void);
@@ -41,6 +42,7 @@ static bool application_init (void)
 {
     static gpio_t hc12_set;
     static hc12_t hc12;
+    static console_t console;
 
 
     __disable_irq();
@@ -61,9 +63,15 @@ static bool application_init (void)
     uart_init (&hc12_uart, HC12_UART_INSTANCE, SystemCoreClock, 9600);
 
     // Drivers
-    hc12_init (&hc12, &hc12_uart, &hc12_set);
+    NVIC_ClearPendingIRQ (USART1_IRQn);
+    NVIC_SetPriority (USART1_IRQn, 0);
+    NVIC_EnableIRQ (USART1_IRQn);
 
-    irq_manager_register_callback (IRQ_EVENT_UART_1, NULL, NULL);
+    hc12_init (&hc12, &hc12_uart, &hc12_set);
+    console_init (&console, &console_uart);
+
+    irq_manager_register_callback (IRQ_EVENT_UART_2, NULL, NULL);
+    irq_manager_register_callback (IRQ_EVENT_UART_1, console_uart_callback, &console);
 
     // ----- Place init functions here ----- //
     __enable_irq();

@@ -5,7 +5,7 @@
 
 typedef struct {
     uart_instance_t* usart;
-    gpio_t* gpio;
+    gpio_t* set;
 } hc12_t;
 
 void hc12_init (hc12_t* self, uart_instance_t* usart, gpio_t* set);

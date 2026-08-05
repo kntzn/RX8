@@ -1,4 +1,6 @@
 #include <stddef.h>
+#include <assert.h>
+
 #include "stm32f303xc.h"
 
 #include "board.h"
@@ -13,6 +15,10 @@ static USART_TypeDef*   usart_table    [USART_INSTANCE_COUNT] = {0};
 bool uart_register_instance (uart_instance_t* self, USART_TypeDef* uart);
 uart_instance_t* uart_get_instance_by_uart (USART_TypeDef* stm_uart);
 
+void uart_process_rx_isr (uart_instance_t* self);
+void uart_process_tx_isr (uart_instance_t* self);
+
+
 bool uart_init (uart_instance_t* self, USART_TypeDef* uart, uint32_t clock_freq, uint32_t baudrate)
 {
     self->instance = uart;
@@ -26,7 +32,16 @@ bool uart_init (uart_instance_t* self, USART_TypeDef* uart, uint32_t clock_freq,
     self->instance->BRR = (clock_freq + baudrate/2U)/baudrate;
 
     self->instance->CR1 |= USART_CR1_TE | USART_CR1_RE;
+    self->instance->CR1 |= USART_CR1_RXNEIE;
+
     self->instance->CR1 |= USART_CR1_UE;
+
+    self->rx_head = 0;
+    self->rx_tail = 0;
+    self->tx_head = 0;
+    self->tx_tail = 0;
+
+    static_assert (IS_POWER_OF_2 (UART_BUFFER_SIZE));
 
     return uart_register_instance (self, uart);
 }
@@ -87,20 +102,19 @@ bool uart_irq_handler (USART_TypeDef* stm_uart)
     
     if ((uart->instance->ISR & USART_ISR_RXNE) != 0u) 
     {
-        uint8_t byte = (uint8_t)uart->instance->RDR;
-        //uart_rx_push_isr(uart, byte);
-        (void)byte;
-
+        uart_process_rx_isr(uart);
+        
         uart->events |= UART_IRQ_EVENT_RX_AVAIL;
     }
 
     if (((uart->instance->ISR & USART_ISR_TXE) != 0u) &&
         ((uart->instance->CR1 & USART_CR1_TXEIE) != 0u)) 
         {
-        //uart_tx_process_isr(uart);
+        uart_process_tx_isr(uart);
 
         uart->events |= UART_IRQ_EVENT_TX_READY;
         }
+
 
     // if ((uart->instance->ISR & USART_ISR_ORE) != 0u) 
     // {
@@ -108,6 +122,7 @@ bool uart_irq_handler (USART_TypeDef* stm_uart)
         //events |= UART_IRQ_EVENT_ERROR;
     // }
     
+
     return uart->events != UART_IRQ_EVENT_NONE;
 }
 
@@ -160,5 +175,25 @@ uart_irq_event_t uart_take_events (uart_instance_t* self)
 
     return event_mask;
 }
+
+void uart_process_tx_isr (uart_instance_t* self)
+{
+    if (self->tx_head != self->tx_tail)
+    {
+        self->instance->TDR = self->tx_buffer [self->tx_head];
+        self->tx_head = (self->tx_head+1)/(UART_BUFFER_SIZE-1);
+    }
+}
+
+void uart_process_rx_isr (uart_instance_t* self)
+{
+    uint16_t next_tail = (self->rx_tail+1)/(UART_BUFFER_SIZE-1);
+
+    if (self->rx_head != next_tail)
+    {
+        self->rx_buffer [self->rx_tail] = (uint8_t)self->instance->RDR;
+        self->rx_tail = next_tail;
+    }
+}  
 
 #undef USART_INSTANCE_COUNT
