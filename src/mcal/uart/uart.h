@@ -1,9 +1,11 @@
 #pragma once
 
+#include <stm32f303xc.h>
+
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <stm32f303xc.h>
+#include "ring_buffer.h"
 
 #define UART_BUFFER_SIZE 64
 
@@ -20,15 +22,12 @@ typedef struct
     USART_TypeDef* instance;
 
     uart_irq_event_t events;
-    // context (buffers etc)
-
-    // TODO:
-    uint8_t rx_buffer [UART_BUFFER_SIZE];
-    uint16_t rx_head, rx_tail;
     
-    uint8_t tx_buffer [UART_BUFFER_SIZE];
-    uint16_t tx_head, tx_tail;
+    uint8_t rx_data [UART_BUFFER_SIZE];
+    uint8_t tx_data [UART_BUFFER_SIZE];
 
+    ring_buffer_t tx_buffer, rx_buffer;
+    
     // counter rx / tx
     // irq_mode_rx None/IRQ/DMA
     // irq_mode_tx None/IRQ/DMA
