@@ -10,17 +10,17 @@
 
 #define USART_INSTANCE_COUNT 5
 
-static uart_instance_t* instance_table [USART_INSTANCE_COUNT] = {0};
+static uart_instance_t * instance_table [USART_INSTANCE_COUNT] = {0};
 static USART_TypeDef*   usart_table    [USART_INSTANCE_COUNT] = {0};
 
-bool uart_register_instance (uart_instance_t* self, USART_TypeDef* uart);
-uart_instance_t* uart_get_instance_by_uart (USART_TypeDef* stm_uart);
+bool uart_register_instance (uart_instance_t * self, USART_TypeDef* uart);
+uart_instance_t * uart_get_instance_by_uart (USART_TypeDef* stm_uart);
 
-bool uart_process_rx_isr (uart_instance_t* self);
-bool uart_process_tx_isr (uart_instance_t* self);
+bool uart_process_rx_isr (uart_instance_t * self);
+bool uart_process_tx_isr (uart_instance_t * self);
 
 
-bool uart_init (uart_instance_t* self, USART_TypeDef* uart, uint32_t clock_freq, uint32_t baudrate)
+bool uart_init (uart_instance_t * self, USART_TypeDef* uart, uint32_t clock_freq, uint32_t baudrate)
 {
     self->instance = uart;
 
@@ -50,7 +50,7 @@ bool uart_init (uart_instance_t* self, USART_TypeDef* uart, uint32_t clock_freq,
 
 bool uart_irq_handler (USART_TypeDef* stm_uart)
 {
-    uart_instance_t* uart = uart_get_instance_by_uart (stm_uart);
+    uart_instance_t * uart = uart_get_instance_by_uart (stm_uart);
 
     uart_irq_event_t raised_events = UART_IRQ_EVENT_NONE;
 
@@ -86,7 +86,7 @@ bool uart_irq_handler (USART_TypeDef* stm_uart)
     return raised_events != UART_IRQ_EVENT_NONE;
 }
 
-bool uart_register_instance (uart_instance_t* self, USART_TypeDef* uart)
+bool uart_register_instance (uart_instance_t * self, USART_TypeDef* uart)
 {
     // Save ptrs to instance and stm uart regs structure
     for (uint8_t idx = 0; idx < USART_INSTANCE_COUNT; idx++)
@@ -111,7 +111,7 @@ bool uart_register_instance (uart_instance_t* self, USART_TypeDef* uart)
     return false;
 }
 
-uart_irq_event_t uart_take_events (uart_instance_t* self)
+uart_irq_event_t uart_take_events (uart_instance_t * self)
 {
     uart_irq_event_t event_mask;
 
@@ -124,9 +124,46 @@ uart_irq_event_t uart_take_events (uart_instance_t* self)
     return event_mask;
 }
 
+bool uart_read_async (uart_instance_t * self, uint8_t * byte)
+{
+    if (self == NULL)
+    {
+        debug_raise_fault (FAULT_UNEXPECTED_NULL);
+        return false;
+    }
+
+    return ring_buffer_pop (&self->rx_buffer, byte);
+}
+
+bool uart_write_async (uart_instance_t * self, uint8_t byte)
+{
+    if (self == NULL)
+    {
+        debug_raise_fault (FAULT_UNEXPECTED_NULL);
+        return false;
+    }
+
+    return ring_buffer_push (&self->tx_buffer, byte);   
+}
+
+bool uart_write_bytes_async (uart_instance_t * self, uint8_t * string, size_t len)
+{
+    if (self == NULL)
+    {
+        debug_raise_fault (FAULT_UNEXPECTED_NULL);
+        return false;
+    }
+
+    for (size_t i = 0; i < len; i++)
+        if (!ring_buffer_push (&self->tx_buffer, string[i]))
+            return false;
+
+    return true;   
+}
+
 // ---------- Private defenitions ---------- //
 
-bool uart_process_tx_isr (uart_instance_t* self)
+bool uart_process_tx_isr (uart_instance_t * self)
 {   
     uint8_t byte;
     
@@ -137,7 +174,7 @@ bool uart_process_tx_isr (uart_instance_t* self)
     return true;
 }
 
-bool uart_process_rx_isr (uart_instance_t* self)
+bool uart_process_rx_isr (uart_instance_t * self)
 {
     uint8_t byte = (uint8_t)self->instance->RDR;
     
@@ -147,7 +184,7 @@ bool uart_process_rx_isr (uart_instance_t* self)
     return true;
 }  
 
-uart_instance_t* uart_get_instance_by_uart (USART_TypeDef* stm_uart)
+uart_instance_t * uart_get_instance_by_uart (USART_TypeDef* stm_uart)
 {
     for (uint8_t idx = 0; idx < USART_INSTANCE_COUNT; idx++)
     {
@@ -162,7 +199,7 @@ uart_instance_t* uart_get_instance_by_uart (USART_TypeDef* stm_uart)
 
 // ---------- Deprecated ---------- //
 
-void uart_write_blocking (uart_instance_t* self, uint8_t* buffer, uint32_t len)
+void uart_write_blocking (uart_instance_t * self, uint8_t* buffer, uint32_t len)
 {
     for (uint32_t i = 0; i < len; i++)
     {
@@ -177,7 +214,7 @@ void uart_write_blocking (uart_instance_t* self, uint8_t* buffer, uint32_t len)
     while (!(self->instance->ISR & USART_ISR_TC));
 }
 
-void uart_read_blocking  (uart_instance_t* self, uint8_t* buffer, uint32_t len)
+void uart_read_blocking  (uart_instance_t * self, uint8_t* buffer, uint32_t len)
 {
     for (uint32_t i = 0; i < len; i++)
     {
@@ -188,17 +225,17 @@ void uart_read_blocking  (uart_instance_t* self, uint8_t* buffer, uint32_t len)
 
 }
 
-uint8_t uart_read_byte  (uart_instance_t* self)
+uint8_t uart_read_byte  (uart_instance_t * self)
 {
     return (uint8_t)self->instance->RDR;
 }
 
-bool uart_ready (uart_instance_t* self)
+bool uart_ready (uart_instance_t * self)
 {
     return (bool)(self->instance->ISR & USART_ISR_RXNE);
 }
 
-void uart_write_byte (uart_instance_t* self, uint8_t byte)
+void uart_write_byte (uart_instance_t * self, uint8_t byte)
 {
     // Wait for TDR to be ready to receive data
     while (!(self->instance->ISR & USART_ISR_TXE));
