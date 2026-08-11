@@ -26,7 +26,7 @@ int main ()
     while (true)
     {
         irq_manager_dispatch();
-
+        
         __WFI ();
     }    
     

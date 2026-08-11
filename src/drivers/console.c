@@ -21,8 +21,36 @@ bool console_init (console_t* self, uart_instance_t* usart)
 
     self->cursor = 0;
     self->command_pending = false;
+    self->callback = NULL;
+    self->callback_ctx = NULL;
     
     return ok;
+}
+
+bool console_bind_command_pending_callback(console_t *self, command_pending_callback_t callback, void *context)
+{
+    if (self == NULL || callback == NULL || context == NULL)
+        return false;
+
+    self->callback = callback;
+    self->callback_ctx = context;
+
+    return true;
+}
+
+bool console_take_line (console_t* self, uint8_t* line, size_t* len)
+{
+    if (self == NULL || line == NULL || len == 0)
+        return false;
+
+    if (!self->command_pending)
+        return false;
+
+    memcpy (line, self->command_line, self->cursor);
+    *len = self->cursor;
+
+    self->cursor = 0;
+    self->command_pending = false;
 }
 
 void console_uart_callback (void* context)
@@ -30,6 +58,7 @@ void console_uart_callback (void* context)
     console_t* self = (console_t*) context;
     uint8_t incomming_byte;
 
+    // read uart if pending until return found 
     if (self->usart->events & UART_IRQ_EVENT_RX_AVAIL && !self->command_pending)
     {
         while (uart_read_async (self->usart, &incomming_byte))
@@ -44,6 +73,8 @@ void console_uart_callback (void* context)
             else if (console_is_CR (incomming_byte))
             {
                 self->command_pending = true;
+                if (self->callback != NULL)
+                    self->callback (self->callback_ctx);
             }
             else
             {

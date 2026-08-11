@@ -149,7 +149,6 @@ bool uart_write_async (uart_instance_t * self, uint8_t byte)
         return false;
     
     self->instance->CR1 |= USART_CR1_TXEIE;
-     
     return true;
 
 }
@@ -168,8 +167,7 @@ bool uart_write_bytes_async (uart_instance_t * self, uint8_t * string, size_t le
         if (!ring_buffer_push (&self->tx_buffer, string[i]))
             return false;
 
-    self->instance->CR1 |= USART_CR1_TXEIE;
-   
+    self->instance->CR1 |= USART_CR1_TXEIE;   
     return true;   
 }
 
