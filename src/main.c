@@ -8,13 +8,11 @@
 #include "gpio.h"
 #include "pinmap.h"
 #include "hc12.h"
+#include "console.h"
 #include "irq_manager.h"
+#include "debug.h"
 
 static bool application_init (void);
-
-// TODO!!!!
-static uart_instance_t hc12_uart;
-static uart_instance_t console_uart;
 
 int main ()
 {
@@ -27,8 +25,9 @@ int main ()
 
     while (true)
     {
-        
         irq_manager_dispatch();
+        
+        __WFI ();
     }    
     
     //runtime_run_once();    
@@ -41,7 +40,9 @@ static bool application_init (void)
 {
     static gpio_t hc12_set;
     static hc12_t hc12;
-
+    static console_t console;
+    static uart_instance_t hc12_uart;
+    static uart_instance_t console_uart;
 
     __disable_irq();
     // ----- Place init functions here ----- //
@@ -61,54 +62,18 @@ static bool application_init (void)
     uart_init (&hc12_uart, HC12_UART_INSTANCE, SystemCoreClock, 9600);
 
     // Drivers
-    hc12_init (&hc12, &hc12_uart, &hc12_set);
+    NVIC_ClearPendingIRQ (USART1_IRQn);
+    NVIC_SetPriority (USART1_IRQn, 0);
+    NVIC_EnableIRQ (USART1_IRQn);
 
-    irq_manager_register_callback (IRQ_EVENT_UART_1, NULL, NULL);
+    hc12_init (&hc12, &hc12_uart, &hc12_set);
+    console_init (&console, &console_uart);
+
+    irq_manager_register_callback (IRQ_EVENT_UART_2, NULL, NULL);
+    irq_manager_register_callback (IRQ_EVENT_UART_1, console_uart_callback, &console);
 
     // ----- Place init functions here ----- //
     __enable_irq();
 
     return true;
 }
-
-/*
-
-
-    uint32_t idx = 0;
-    uint8_t buffer [128] = {};
-
-    uart_instance_t* UART = &console_uart;
-    uart_instance_t* HC_UART = &hc12_uart;
-
-
-if (uart_ready (UART))
-        {
-            uint8_t byte = uart_read_byte (UART);
-            
-            if (byte != 0x7F)
-            {
-                uart_write_byte (UART, byte);
-                buffer [idx] = byte;          
-                idx++;
-            }
-            else
-            {
-                idx--;
-                uart_write_blocking (UART, (uint8_t*)"\b \b", 3);
-            }
-            
-
-            if (byte == '\r')
-            {
-                uart_write_byte (UART, '\n');
-
-
-                uart_write_blocking (UART, buffer, idx);
-                uart_write_byte (UART, '\n');
-
-                uart_write_blocking (HC_UART, buffer, idx);
-
-                idx = 0;
-            }
-        }
-*/
