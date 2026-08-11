@@ -25,8 +25,9 @@ int main ()
 
     while (true)
     {
-        
         irq_manager_dispatch();
+
+        __WFI ();
     }    
     
     //runtime_run_once();    
@@ -76,45 +77,3 @@ static bool application_init (void)
 
     return true;
 }
-
-/*
-
-
-    uint32_t idx = 0;
-    uint8_t buffer [128] = {};
-
-    uart_instance_t* UART = &console_uart;
-    uart_instance_t* HC_UART = &hc12_uart;
-
-
-if (uart_ready (UART))
-        {
-            uint8_t byte = uart_read_byte (UART);
-            
-            if (byte != 0x7F)
-            {
-                uart_write_byte (UART, byte);
-                buffer [idx] = byte;          
-                idx++;
-            }
-            else
-            {
-                idx--;
-                uart_write_blocking (UART, (uint8_t*)"\b \b", 3);
-            }
-            
-
-            if (byte == '\r')
-            {
-                uart_write_byte (UART, '\n');
-
-
-                uart_write_blocking (UART, buffer, idx);
-                uart_write_byte (UART, '\n');
-
-                uart_write_blocking (HC_UART, buffer, idx);
-
-                idx = 0;
-            }
-        }
-*/

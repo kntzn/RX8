@@ -7,7 +7,11 @@
 #include "utils.h"
 
 inline bool console_is_special (uint8_t byte);
+inline bool console_is_BS (uint8_t byte);
+inline bool console_is_CR (uint8_t byte);
 const char * console_get_response (uint8_t byte);
+
+bool console_echo (console_t * self, uint8_t byte);
 
 bool console_init (console_t* self, uart_instance_t* usart)
 {
@@ -15,9 +19,9 @@ bool console_init (console_t* self, uart_instance_t* usart)
 
     self->usart = usart;
 
-    ok = ok && ring_buffer_init (&self->rx_buffer, self->rx_data, CONSOLE_BUFFER_SIZE);
-    ok = ok && ring_buffer_init (&self->tx_buffer, self->tx_data, CONSOLE_BUFFER_SIZE);
-
+    self->cursor = 0;
+    self->command_pending = false;
+    
     return ok;
 }
 
@@ -26,27 +30,27 @@ void console_uart_callback (void* context)
     console_t* self = (console_t*) context;
     uint8_t incomming_byte;
 
-    if (self->usart->events & UART_IRQ_EVENT_RX_AVAIL)
+    if (self->usart->events & UART_IRQ_EVENT_RX_AVAIL && !self->command_pending)
     {
         while (uart_read_async (self->usart, &incomming_byte))
         {
-            if (console_is_special (incomming_byte))
+            console_echo (self, incomming_byte);
+
+            if (console_is_BS (incomming_byte))
             {
-                const char * resp_p = console_get_response (incomming_byte);
-                
-                uart_write_bytes_async (self->usart, (uint8_t *) resp_p, strlen (resp_p));
+                if (self->cursor > 0)
+                    self->cursor--;
+            } 
+            else if (console_is_CR (incomming_byte))
+            {
+                self->command_pending = true;
             }
             else
             {
-                uart_write_async (self->usart, incomming_byte);
-                // response = incomming_byte;
-
-
-                if (!ring_buffer_push (&self->rx_buffer, incomming_byte))
-                {
-                    debug_raise_fault (FAULT_OUT_OF_SPACE);
-                    break;
-                }
+                if (self->cursor < CONSOLE_BUFFER_SIZE-1)
+                    self->command_line [self->cursor++] = incomming_byte;
+                else                
+                    console_echo (self, '\b');
             }
         }
     }
@@ -56,34 +60,41 @@ inline bool console_is_special (uint8_t byte)
 {
     return byte < 32 || byte == 127;
 }
-
-const char * console_get_response (uint8_t byte)
+inline bool console_is_BS (uint8_t byte)
 {
+    return byte == '\b' || byte == 127;
+}
+inline bool console_is_CR (uint8_t byte)
+{
+    return byte == '\n' || byte == '\r';
+}
 
-
-    switch (byte)
+bool console_echo (console_t * self, uint8_t byte)
+{
+    if (console_is_special (byte))
     {
-        case '\r':
-        case '\n':
+        switch (byte)
         {
-            
-            return "\n";
+        case '\n':
+        case '\r':
+            if (!uart_write_bytes_async (self->usart, (uint8_t *)"\n\r", 2))
+                return false;
             break;
-        }
-            
+
         case '\b':
         case 0x7F:
-        {   
-            return "\b \b";
+            if (!uart_write_bytes_async (self->usart, (uint8_t *)"\b \b", 3))
+                return false;
             break;
-        }
         default:
-        {
-            
-            return NULL;
             break;
         }
     }
-    
+    else
+    {
+        if (!uart_write_async (self->usart, byte))
+            return false;
+    }
 
-} 
+    return true;
+}
