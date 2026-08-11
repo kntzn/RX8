@@ -38,14 +38,15 @@ void console_uart_callback (void* context)
             }
             else
             {
+                uart_write_async (self->usart, incomming_byte);
                 // response = incomming_byte;
-            }
 
 
-            if (!ring_buffer_push (&self->rx_buffer, incomming_byte))
-            {
-                debug_raise_fault (FAULT_OUT_OF_SPACE);
-                break;
+                if (!ring_buffer_push (&self->rx_buffer, incomming_byte))
+                {
+                    debug_raise_fault (FAULT_OUT_OF_SPACE);
+                    break;
+                }
             }
         }
     }
@@ -58,16 +59,30 @@ inline bool console_is_special (uint8_t byte)
 
 const char * console_get_response (uint8_t byte)
 {
+
+
     switch (byte)
     {
-    case '\r':
-    case '\n':
-        return "\n";
-    case '\b':
-    case 0x7F:
-        return "\b \b";
-    default:
-        return NULL;
+        case '\r':
+        case '\n':
+        {
+            
+            return "\n";
+            break;
+        }
+            
+        case '\b':
+        case 0x7F:
+        {   
+            return "\b \b";
+            break;
+        }
+        default:
+        {
+            
+            return NULL;
+            break;
+        }
     }
     
 
