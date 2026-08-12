@@ -13,6 +13,8 @@ MCU     = cortex-m4
 CFLAGS  = -mcpu=$(MCU) -mthumb -Wall -Wextra -Werror -Og -g -ffunction-sections -fdata-sections -DSTM32F30X_MD -DSTM32F303xC
 LDFLAGS = -mcpu=$(MCU) -mthumb -Wl,--gc-sections
 
+# -Wpedantic :)
+
 # Пути к заголовкам
 INC_DIRS := $(shell find Core/Include Include src -type d 2>/dev/null)
 INC := $(addprefix -I, $(INC_DIRS))
