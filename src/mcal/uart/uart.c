@@ -19,6 +19,9 @@ uart_instance_t * uart_get_instance_by_uart (USART_TypeDef* stm_uart);
 bool uart_process_rx_isr (uart_instance_t * self);
 bool uart_process_tx_isr (uart_instance_t * self);
 
+bool uart_byte_stream_read (void * self, uint8_t* byte);
+bool uart_byte_stream_write (void * self, uint8_t byte);
+
 
 bool uart_init (uart_instance_t * self, USART_TypeDef* uart, uint32_t clock_freq, uint32_t baudrate)
 {
@@ -45,7 +48,15 @@ bool uart_init (uart_instance_t * self, USART_TypeDef* uart, uint32_t clock_freq
     if (!(ring_buffer_init (&self->tx_buffer, self->tx_data, UART_BUFFER_SIZE)))
         return false;
    
+    if (!byte_stream_init (&self->stream, self, uart_byte_stream_read, uart_byte_stream_write))
+        return false;
+
     return uart_register_instance (self, uart);
+}
+
+byte_stream_t* uart_get_stream (uart_instance_t* self)
+{
+    return &self->stream;
 }
 
 bool uart_irq_handler (USART_TypeDef* stm_uart)
@@ -210,6 +221,14 @@ uart_instance_t * uart_get_instance_by_uart (USART_TypeDef* stm_uart)
     return NULL;
 }
 
+bool uart_byte_stream_read (void * self, uint8_t* byte)
+{
+    return uart_read_async ((uart_instance_t*)self, byte);
+}
+bool uart_byte_stream_write (void * self, uint8_t byte)
+{
+    return uart_write_async ((uart_instance_t*)self, byte);
+}
 
 // ---------- Deprecated ---------- //
 

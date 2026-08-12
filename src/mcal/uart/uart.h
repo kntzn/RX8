@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 #include "ring_buffer.h"
+#include "byte_stream.h"
 
 #define UART_BUFFER_SIZE 64
 
@@ -28,6 +29,8 @@ typedef struct
 
     ring_buffer_t tx_buffer, rx_buffer;
     
+    byte_stream_t stream;    
+
     // counter rx / tx
     // irq_mode_rx None/IRQ/DMA
     // irq_mode_tx None/IRQ/DMA
@@ -45,14 +48,7 @@ typedef struct
  */
 bool uart_init (uart_instance_t* self, USART_TypeDef* uart, uint32_t clock_freq, uint32_t baudrate);
 
-// Buffer blocking functions
-//oid uart_write_blocking (uart_instance_t* self, uint8_t* buffer, uint32_t len);
-//void uart_read_blocking  (uart_instance_t* self, uint8_t* buffer, uint32_t len);
-
-// Single-byte functions
-//uint8_t uart_read_byte  (uart_instance_t* self);
-//bool uart_ready (uart_instance_t* self);
-//void uart_write_byte (uart_instance_t* self, uint8_t byte);
+byte_stream_t* uart_get_stream (uart_instance_t* self);
 
 /**
  * @brief common irq handler for all u(s)arts
@@ -65,3 +61,12 @@ uart_irq_event_t uart_take_events (uart_instance_t* self);
 bool uart_read_async (uart_instance_t * self, uint8_t * byte);
 bool uart_write_async (uart_instance_t * self, uint8_t byte);
 bool uart_write_bytes_async (uart_instance_t * self, uint8_t * string, size_t len);
+
+// Buffer blocking functions
+//void uart_write_blocking (uart_instance_t* self, uint8_t* buffer, uint32_t len);
+//void uart_read_blocking  (uart_instance_t* self, uint8_t* buffer, uint32_t len);
+
+// Single-byte functions
+//uint8_t uart_read_byte  (uart_instance_t* self);
+//bool uart_ready (uart_instance_t* self);
+//void uart_write_byte (uart_instance_t* self, uint8_t byte);
