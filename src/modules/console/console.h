@@ -22,6 +22,6 @@ bool console_init (console_t* self, uart_instance_t* usart);
 
 bool console_bind_command_pending_callback (console_t* self, command_pending_callback_t callback, void* context);
 
-bool console_take_line (console_t* self, uint8_t** line, size_t len);
+bool console_take_line (console_t* self, uint8_t* line, size_t* len);
 
 void console_uart_callback (void* context);

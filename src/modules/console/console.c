@@ -51,6 +51,7 @@ bool console_take_line (console_t* self, uint8_t* line, size_t* len)
 
     self->cursor = 0;
     self->command_pending = false;
+    return true;
 }
 
 void console_uart_callback (void* context)
