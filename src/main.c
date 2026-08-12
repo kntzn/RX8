@@ -9,7 +9,7 @@
 #include "pinmap.h"
 #include "hc12.h"
 #include "console.h"
-#include "irq_manager.h"
+#include "notification_manager.h"
 #include "debug.h"
 #include "byte_stream.h"
 
@@ -26,7 +26,7 @@ int main ()
 
     while (true)
     {
-        irq_manager_dispatch();
+        notification_manager_dispatch();
         
         __WFI ();
     }    
@@ -72,8 +72,12 @@ static bool application_init (void)
     hc12_init (&hc12, &hc12_uart, &hc12_set);
     console_init (&console, hc12_stream);
 
-    irq_manager_register_callback (IRQ_EVENT_UART_2, NULL, NULL);
-    irq_manager_register_callback (IRQ_EVENT_UART_1, console_rx_callback, &console);
+    //notification_manager_register_callback (IRQ_EVENT_UART_2, NULL, NULL);
+    //notification_manager_register_callback (IRQ_EVENT_UART_1, console_rx_callback, &console);
+
+    uart_bind_rx_callback (&console_uart, 
+        notification_manager_register_callback (console_rx_callback));
+
 
     // ----- Place init functions here ----- //
     __enable_irq();
