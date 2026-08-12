@@ -45,7 +45,15 @@ bool uart_init (uart_instance_t * self, USART_TypeDef* uart, uint32_t clock_freq
     if (!(ring_buffer_init (&self->tx_buffer, self->tx_data, UART_BUFFER_SIZE)))
         return false;
    
+    
+    byte_stream_init (&self->stream)
+
     return uart_register_instance (self, uart);
+}
+
+byte_stream_t* uart_get_stream (uart_instance_t* self)
+{
+    return &self->stream;
 }
 
 bool uart_irq_handler (USART_TypeDef* stm_uart)
