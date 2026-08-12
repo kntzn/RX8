@@ -26,8 +26,18 @@ int main ()
 
     while (true)
     {
+        // launch scheduled tasks
+        // TODO: scheduler_run ();
+
+        // launch handlers raised by hardware events
         notification_manager_dispatch();
         
+        // launch handlers raised by software
+        // TODO: event_manager ();
+
+        // launch low priority tasks
+        // TODO: background ();
+
         __WFI ();
     }    
     
@@ -72,12 +82,10 @@ static bool application_init (void)
     hc12_init (&hc12, &hc12_uart, &hc12_set);
     console_init (&console, console_stream);
 
-    //notification_manager_register_callback (IRQ_EVENT_UART_2, NULL, NULL);
-    //notification_manager_register_callback (IRQ_EVENT_UART_1, console_rx_callback, &console);
-
+    // binding rx avil notification from uart to console
     uart_bind_rx_callback (&console_uart, 
         notification_manager_register_callback (console_rx_callback, &console));
-
+    
 
     // ----- Place init functions here ----- //
     __enable_irq();

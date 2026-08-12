@@ -1,7 +1,5 @@
 #include <stm32f303xc.h>
-
 #include "uart.h"
-
 
 void USART1_IRQHandler ()
 {
