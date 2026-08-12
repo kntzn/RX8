@@ -7,6 +7,7 @@
 
 #include "ring_buffer.h"
 #include "byte_stream.h"
+#include "core/notification_manager/notification_manager.h"
 
 #define UART_BUFFER_SIZE 64
 
@@ -30,6 +31,8 @@ typedef struct
     ring_buffer_t tx_buffer, rx_buffer;
     
     byte_stream_t stream;    
+
+    notification_id_t rx_callback_id;
 
     // counter rx / tx
     // irq_mode_rx None/IRQ/DMA
@@ -61,6 +64,8 @@ uart_irq_event_t uart_take_events (uart_instance_t* self);
 bool uart_read_async (uart_instance_t * self, uint8_t * byte);
 bool uart_write_async (uart_instance_t * self, uint8_t byte);
 bool uart_write_bytes_async (uart_instance_t * self, uint8_t * string, size_t len);
+
+void uart_bind_rx_callback (uart_instance_t * self, notification_id_t id);
 
 // Buffer blocking functions
 //void uart_write_blocking (uart_instance_t* self, uint8_t* buffer, uint32_t len);

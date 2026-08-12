@@ -51,7 +51,14 @@ bool uart_init (uart_instance_t * self, USART_TypeDef* uart, uint32_t clock_freq
     if (!byte_stream_init (&self->stream, self, uart_byte_stream_read, uart_byte_stream_write))
         return false;
 
+    self->rx_callback_id = 0;
+
     return uart_register_instance (self, uart);
+}
+
+void uart_bind_rx_callback (uart_instance_t * self, notification_id_t id)
+{
+    self->rx_callback_id = id;
 }
 
 byte_stream_t* uart_get_stream (uart_instance_t* self)
@@ -72,6 +79,8 @@ bool uart_irq_handler (USART_TypeDef* stm_uart)
         if (!uart_process_rx_isr(uart))
             debug_raise_fault (FAULT_OUT_OF_SPACE);
         
+        notification_manager_raise (uart->rx_callback_id);
+
         raised_events |= UART_IRQ_EVENT_RX_AVAIL;
     }
 
