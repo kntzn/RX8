@@ -1,7 +1,6 @@
 #include <string.h>
 
 #include "console.h"
-#include "uart.h"
 #include "debug.h"
 
 #include "utils.h"
@@ -13,11 +12,11 @@ const char * console_get_response (uint8_t byte);
 
 bool console_echo (console_t * self, uint8_t byte);
 
-bool console_init (console_t* self, uart_instance_t* usart)
+bool console_init (console_t* self, byte_stream_t* stream)
 {
     bool ok = true;
 
-    self->usart = usart;
+    self->stream = stream;
 
     self->cursor = 0;
     self->command_pending = false;
@@ -51,17 +50,18 @@ bool console_take_line (console_t* self, uint8_t* line, size_t* len)
 
     self->cursor = 0;
     self->command_pending = false;
+    return true;
 }
 
-void console_uart_callback (void* context)
+void console_rx_callback (void* context)
 {
     console_t* self = (console_t*) context;
     uint8_t incomming_byte;
 
     // read uart if pending until return found 
-    if (self->usart->events & UART_IRQ_EVENT_RX_AVAIL && !self->command_pending)
+    if (!self->command_pending)
     {
-        while (uart_read_async (self->usart, &incomming_byte))
+        while (byte_stream_read (self->stream, &incomming_byte))
         {
             console_echo (self, incomming_byte);
 
@@ -108,13 +108,20 @@ bool console_echo (console_t * self, uint8_t byte)
         {
         case '\n':
         case '\r':
-            if (!uart_write_bytes_async (self->usart, (uint8_t *)"\n\r", 2))
+            if (!byte_stream_write (self->stream, '\n')) // TODO: impement multiple bytes write
+                return false;
+            if (!byte_stream_write (self->stream, '\r'))
                 return false;
             break;
 
         case '\b':
         case 0x7F:
-            if (!uart_write_bytes_async (self->usart, (uint8_t *)"\b \b", 3))
+            // TODO: impement multiple bytes write
+            if (!byte_stream_write (self->stream, '\b')) // TODO: impement multiple bytes write
+                return false;
+            if (!byte_stream_write (self->stream, ' ')) // TODO: impement multiple bytes write
+                return false;
+            if (!byte_stream_write (self->stream, '\b'))
                 return false;
             break;
         default:
@@ -123,7 +130,7 @@ bool console_echo (console_t * self, uint8_t byte)
     }
     else
     {
-        if (!uart_write_async (self->usart, byte))
+        if (!byte_stream_write (self->stream, byte))
             return false;
     }
 
