@@ -6,6 +6,12 @@
 
 typedef void (*command_pending_callback_t)(void * context);
 
+typedef struct 
+{
+    uint8_t * line;
+    size_t len;
+} console_line_t;
+
 typedef struct {
     byte_stream_t* stream;
 
@@ -13,15 +19,11 @@ typedef struct {
     size_t cursor;
 
     bool command_pending;
-    command_pending_callback_t callback;
-    void * callback_ctx;
 
 } console_t;
 
 bool console_init (console_t* self, byte_stream_t* stream);
 
-bool console_bind_command_pending_callback (console_t* self, command_pending_callback_t callback, void* context);
-
-bool console_take_line (console_t* self, uint8_t* line, size_t* len);
+bool console_take_line (console_t* self, console_line_t* line);
 
 void console_rx_callback (void* context);

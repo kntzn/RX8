@@ -20,34 +20,21 @@ bool console_init (console_t* self, byte_stream_t* stream)
 
     self->cursor = 0;
     self->command_pending = false;
-    self->callback = NULL;
-    self->callback_ctx = NULL;
-    
+
     return ok;
 }
 
-bool console_bind_command_pending_callback(console_t *self, command_pending_callback_t callback, void *context)
+bool console_take_line (console_t* self, console_line_t* input_line)
 {
-    if (self == NULL || callback == NULL || context == NULL)
-        return false;
-
-    self->callback = callback;
-    self->callback_ctx = context;
-
-    return true;
-}
-
-bool console_take_line (console_t* self, uint8_t* line, size_t* len)
-{
-    if (self == NULL || line == NULL || len == 0)
+    if (self == NULL || input_line == NULL)
         return false;
 
     if (!self->command_pending)
         return false;
 
-    memcpy (line, self->command_line, self->cursor);
-    *len = self->cursor;
-
+    input_line->line = self->command_line;
+    input_line->len = self->cursor;
+    
     self->cursor = 0;
     self->command_pending = false;
     return true;
@@ -72,9 +59,8 @@ void console_rx_callback (void* context)
             } 
             else if (console_is_CR (incomming_byte))
             {
-                self->command_pending = true;
-                if (self->callback != NULL)
-                    self->callback (self->callback_ctx);
+                self->command_pending = true; 
+                // TODO: raise event 
             }
             else
             {

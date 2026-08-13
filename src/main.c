@@ -54,7 +54,6 @@ static bool application_init (void)
     static console_t console;
     static uart_instance_t hc12_uart;
     static uart_instance_t console_uart;
-    static byte_stream_t* console_stream;
 
     __disable_irq();
     // ----- Place init functions here ----- //
@@ -72,7 +71,6 @@ static bool application_init (void)
     // Periph
     uart_init (&console_uart, CONSOLE_UART_INSTANCE, SystemCoreClock, 115200);
     uart_init (&hc12_uart, HC12_UART_INSTANCE, SystemCoreClock, 9600);
-    console_stream = uart_get_stream (&console_uart);
 
     // Drivers
     NVIC_ClearPendingIRQ (USART1_IRQn);
@@ -80,14 +78,16 @@ static bool application_init (void)
     NVIC_EnableIRQ (USART1_IRQn);
 
     hc12_init (&hc12, &hc12_uart, &hc12_set);
-    console_init (&console, console_stream);
+    console_init (&console, uart_get_stream (&console_uart));
+
+    // ---------- Event binding ---------- //
 
     // binding rx avil notification from uart to console
     uart_bind_rx_callback (&console_uart, 
         notification_manager_register_callback (console_rx_callback, &console));
     
+    // bind comma
 
-    // ----- Place init functions here ----- //
     __enable_irq();
 
     return true;
