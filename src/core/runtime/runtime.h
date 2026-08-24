@@ -1,7 +1,5 @@
 #pragma once 
 
-#include "core_config.h"
-
 /**
  * @brief superloop function call
  * @brief processes realtime, event handlers and background

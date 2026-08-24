@@ -9,9 +9,12 @@
 #include "pinmap.h"
 #include "hc12.h"
 #include "console.h"
-#include "notification_manager.h"
+
 #include "debug.h"
 #include "byte_stream.h"
+
+#include "core/notification_manager/notification_manager.h"
+#include "core/event/event.h"
 
 static bool application_init (void);
 
@@ -80,13 +83,15 @@ static bool application_init (void)
     hc12_init (&hc12, &hc12_uart, &hc12_set);
     console_init (&console, uart_get_stream (&console_uart));
 
-    // ---------- Event binding ---------- //
+    // ---------- Notification binding ---------- //
 
     // binding rx avil notification from uart to console
     uart_bind_rx_callback (&console_uart, 
         notification_manager_register_callback (console_rx_callback, &console));
     
-    // bind comma
+    // ---------- Event binding ---------- //
+
+    event_register_handler (EVENT_CONSOLE_LINE_READY, NULL, NULL);
 
     __enable_irq();
 
