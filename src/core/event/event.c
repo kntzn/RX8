@@ -5,41 +5,42 @@
 
 #define EVENT_QUEUE_SIZE 32
 
-// ------- Private declarations ------ //
-static bool     event_pop (event_record_t* event);
-
-
-// --------- Private objects --------- //
+STATIC_ASSERT (IS_POWER_OF_2 (EVENT_QUEUE_SIZE));
+    
 typedef struct 
 {
     event_t event;
     void * context;
 } event_record_t;
 
+// ------- Private declarations ------ //
+static bool event_pop (event_record_t* event);
+
+// --------- Private objects --------- //
 static size_t queue_head = 0, queue_tail = 0;
 static event_record_t event_queue [EVENT_QUEUE_SIZE] = {};
 
-static event_handler_t event_handlers[__EVENT_MAX] = { NULL };
+static event_handler_t event_handlers [__EVENT_MAX] = { NULL };
+static void * event_handlers_contexts [__EVENT_MAX] = { NULL };
 
 static void default_handler(const event_t event) 
 {
     debug_raise_fault (FAULT_NOT_IMPLEMENTED);
-    // TODO: handle failed events
     (void)event;
 }
 
 // ------- Public  defenitions ------- //
-bool event_register_handler (event_t event, event_handler_t handler)
+bool event_register_handler (event_t event, event_handler_t handler, void * context)
 {
-    static_assert (IS_POWER_OF_2 (EVENT_QUEUE_SIZE));
-
     if (event >= __EVENT_MAX || 
         handler == NULL || 
-        event_handlers [event] != NULL)
+        event_handlers [event] != NULL ||
+        event_handlers_contexts [event] != NULL)
         return false;
     
     event_handlers [event] = handler;
-    
+    event_handlers_contexts [event] = context;
+
     return true;
 }
 
@@ -74,8 +75,13 @@ void event_dispatch (uint16_t count)
         }
         
         event_handler_t handler = event_handlers[record.event];
+        void * handler_context = event_handlers_contexts [record.event];
+
         if (handler != NULL)
-            handler (record.event, record.context);
+        {
+            if (!handler (handler_context, record.context))
+                debug_raise_fault (FAULT_HANDLER_RETVAL); // TODO: from?
+        }
         else
             default_handler (record.event);
     }

@@ -13,6 +13,8 @@
 #include "debug.h"
 #include "byte_stream.h"
 
+#include "modules/command/command.h"
+
 #include "core/notification_manager/notification_manager.h"
 #include "core/event/event.h"
 
@@ -91,7 +93,7 @@ static bool application_init (void)
     
     // ---------- Event binding ---------- //
 
-    event_register_handler (EVENT_CONSOLE_LINE_READY, NULL, NULL);
+    event_register_handler (EVENT_CONSOLE_LINE_READY, command_cli_callback, NULL);
 
     __enable_irq();
 

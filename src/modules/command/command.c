@@ -2,9 +2,10 @@
 
 #include "console.h"
 
-bool command_console_line_parse (uint8_t * line, size_t len);
+bool command_console_line_parse (console_line_t line);
 bool command_console_line_split (uint8_t * line, size_t len, uint8_t ** strings);
 
+/*
 static char* known_words[] = \
 {
     "help",
@@ -13,19 +14,19 @@ static char* known_words[] = \
     "get",
     "motor",
     "current",
-};
+}; */
 
-bool command_cli_callback (void * context)
+bool command_cli_callback (void * dest, void * context)
 {
+    (void)dest;
     console_t * source = (console_t*) context;
     console_line_t console_input;
 
     if (!console_take_line (source, &console_input))
         return false;
-    if (!command_console_line_parse (NULL, 0))
+    if (!command_console_line_parse (console_input))
         return false;
     
-
     return true;
 }
 
@@ -35,13 +36,15 @@ bool command_proto_callback (void * context)
     return false;
 }
 
-bool command_console_line_parse (uint8_t * line, size_t len)
+bool command_console_line_parse (console_line_t line)
 {
-
-    command_console_line_split (line, len, );
+    return command_console_line_split (line.line, line.len, NULL);
 }
 
 bool command_console_line_split (uint8_t * line, size_t len, uint8_t ** strings)
 {
-
+    (void)line;
+    (void)len;
+    (void)strings;
+    return true;
 }

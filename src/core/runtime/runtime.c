@@ -32,7 +32,7 @@ void runtime_run_once()
     // Process realtime
     
     // Process events
-    event_dispatch_default ();
+    event_dispatch (8);
 
     // Process background
     // 
