@@ -15,7 +15,7 @@ EVENT_RESERVED3,
 __EVENT_MAX
 } event_t;
 
-typedef void (*event_handler_t)(const event_t event);
+typedef void (*event_handler_t)(const event_t event, void * context);
 
 /**
  * @brief Add new event to the queue
@@ -25,7 +25,7 @@ typedef void (*event_handler_t)(const event_t event);
  * 
  * @return true on succesfull push, false on overflow
  */
-void event_raise  (event_t event, void * context);
+bool event_raise  (event_t event, void * context);
 
 /**
  * @brief Event dispatcher handler
@@ -49,5 +49,5 @@ void event_dispatch (uint16_t count);
  * 
  * @example event_queue_register_event_handler (RX_PACKET_AVAILABLE, process_packet);
  */
-bool event_register_handler (event_t event, event_handler_t handler, void * context);
+bool event_register_handler (event_t event, event_handler_t handler);
 
