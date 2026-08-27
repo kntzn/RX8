@@ -9,7 +9,7 @@
 
 #define PARSER_MAX_ARGS 8
 
-inline bool command_symbol_is_space (uint8_t symbol);
+inline bool command_symbol_is_split_symbol (uint8_t symbol);
 bool command_console_line_split (uint8_t * line, size_t len, size_t * argc, char ** argv);
 
 void dummy()
@@ -50,7 +50,7 @@ bool command_console_line_split (uint8_t * line, size_t len, size_t * argc, char
     for (; linec < len; linec++)
     {
         // on first non-space symbol occurance
-        if (!command_symbol_is_space (line [linec]))
+        if (! command_symbol_is_split_symbol (line [linec]))
         {
             // set first argument
             if (*argc < PARSER_MAX_ARGS-1)
@@ -65,10 +65,10 @@ bool command_console_line_split (uint8_t * line, size_t len, size_t * argc, char
     // continue splitting until EOL
     for (; linec < len; linec++)
     {
-        if (command_symbol_is_space (line [linec]))
+        if ( command_symbol_is_split_symbol (line [linec]))
         {
             // 
-            if (command_symbol_is_space (line [linec-1]))
+            if ( command_symbol_is_split_symbol (line [linec-1]))
                 is_cont_space = true;
                
             if (!is_cont_space)
@@ -89,7 +89,7 @@ bool command_console_line_split (uint8_t * line, size_t len, size_t * argc, char
     return true;
 }
 
-inline bool command_symbol_is_space (uint8_t symbol)
+inline bool command_symbol_is_split_symbol (uint8_t symbol)
 {
-    return symbol == ' ' || symbol == '\t';
+    return symbol == ' ' || symbol == '\t' || symbol == '\0';
 }
