@@ -5,6 +5,8 @@
 
 #include "utils.h"
 
+#include "core/event/event.h"
+
 inline bool console_is_special (uint8_t byte);
 inline bool console_is_BS (uint8_t byte);
 inline bool console_is_CR (uint8_t byte);
@@ -60,7 +62,7 @@ void console_rx_callback (void* context)
             else if (console_is_CR (incomming_byte))
             {
                 self->command_pending = true; 
-                // TODO: raise event 
+                event_raise (EVENT_CONSOLE_LINE_READY, self);
             }
             else
             {

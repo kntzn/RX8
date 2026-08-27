@@ -22,6 +22,7 @@ bool command_cli_callback (void * dest, void * context)
     console_t * source = (console_t*) context;
     console_line_t console_input;
 
+    // TODO check for data race
     if (!console_take_line (source, &console_input))
         return false;
     if (!command_console_line_parse (console_input))

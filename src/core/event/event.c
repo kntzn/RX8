@@ -54,7 +54,7 @@ bool event_raise (event_t event, void * context)
     if (next_tail == queue_head)
         return false;
 
-    event_queue [next_tail] = raised;
+    event_queue [queue_tail] = raised;
     queue_tail = next_tail;
 
     return true;
