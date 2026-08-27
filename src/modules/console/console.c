@@ -66,7 +66,7 @@ void console_rx_callback (void* context)
             }
             else
             {
-                if (self->cursor < CONSOLE_BUFFER_SIZE-1)
+                if (self->cursor < CONSOLE_BUFFER_SIZE-1-1)
                     self->command_line [self->cursor++] = incomming_byte;
                 else                
                     console_echo (self, '\b');
