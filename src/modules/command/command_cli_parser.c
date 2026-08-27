@@ -1,5 +1,7 @@
 #include "modules/command/command_cli_parser.h"
 
+#include <stm32f303xc.h>
+
 // string "xxx xx xxxx" -> array of ptrs -> converter (ptr_x) ~= dict -> form commands
 
 //void command_parse (cli_interface_t* cli, command_t *command_t)
@@ -37,7 +39,6 @@ bool command_console_line_parse (console_line_t line)
 
 bool command_console_line_split (uint8_t * line, size_t len, size_t * argc, char ** argv)
 {
-    bool is_cont_space = false;
     size_t linec = 0;
     
     if (argc == NULL || argv == NULL)
@@ -64,27 +65,25 @@ bool command_console_line_split (uint8_t * line, size_t len, size_t * argc, char
 
     // continue splitting until EOL
     for (; linec < len; linec++)
-    {
-        if ( command_symbol_is_split_symbol (line [linec]))
+    {   
+        // if this is space
+        if (command_symbol_is_split_symbol (line [linec]))
         {
-            // 
-            if ( command_symbol_is_split_symbol (line [linec-1]))
-                is_cont_space = true;
-               
-            if (!is_cont_space)
-            {
-                if (*argc < PARSER_MAX_ARGS-1)
-                    argv [*argc++] = (char*)(line + linec);
-            }   
-            
             line [linec] = '\0';
         }
         else
-            is_cont_space = false;
+        {
+            if (command_symbol_is_split_symbol (line [linec-1]))
+                if (*argc < PARSER_MAX_ARGS-1)
+                    argv [*argc++] = (char*)(line + linec);
+        }
+            
     }
 
     // console guaranties to have at least one excessive symbol at the end of buffer
     line [linec+1] = '\0';
+
+    __BKPT();
 
     return true;
 }
