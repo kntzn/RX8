@@ -3,8 +3,6 @@
 
 #include <stdbool.h>
 
-#include "core_config.h"
-
 typedef bool (*schedule_handler_t)();
 
 bool scheduler_init ();

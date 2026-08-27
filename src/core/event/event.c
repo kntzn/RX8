@@ -1,89 +1,100 @@
 #include "event.h"
 
+#include "debug/debug.h"
+#include "utils.h"
+
+#define EVENT_QUEUE_SIZE 32
+
+STATIC_ASSERT (IS_POWER_OF_2 (EVENT_QUEUE_SIZE));
+    
+typedef struct 
+{
+    event_t event;
+    void * context;
+} event_record_t;
+
 // ------- Private declarations ------ //
-static bool     event_pop (event_t* event);
+static bool event_pop (event_record_t* event);
 
 // --------- Private objects --------- //
-static uint64_t event_mask;
+static size_t queue_head = 0, queue_tail = 0;
+static event_record_t event_queue [EVENT_QUEUE_SIZE] = {};
+
+static event_handler_t event_handlers [__EVENT_MAX] = { NULL };
+static void * event_handlers_contexts [__EVENT_MAX] = { NULL };
 
 static void default_handler(const event_t event) 
 {
-    // TODO: handle failed events
+    debug_raise_fault (FAULT_NOT_IMPLEMENTED);
     (void)event;
 }
 
-static event_handler_t event_handlers[__EVENT_MAX] = { };
-
 // ------- Public  defenitions ------- //
-bool event_register_event_handler (event_t event, event_handler_t handler)
+bool event_register_handler (event_t event, event_handler_t handler, void * context)
 {
     if (event >= __EVENT_MAX || 
         handler == NULL || 
-        event_handlers [event] != NULL)
+        event_handlers [event] != NULL ||
+        event_handlers_contexts [event] != NULL)
         return false;
     
     event_handlers [event] = handler;
+    event_handlers_contexts [event] = context;
+
     return true;
 }
 
-void event_push (event_t event)
+bool event_raise (event_t event, void * context)
 {
-    event_mask |= (1ULL << (uint64_t)event);
+    event_record_t raised;
+    raised.event = event;
+    raised.context = context;
+
+    size_t next_tail = (queue_tail + 1) & (EVENT_QUEUE_SIZE - 1);
+    if (next_tail == queue_head)
+        return false;
+
+    event_queue [next_tail] = raised;
+    queue_tail = next_tail;
+
+    return true;
 }
 
 void event_dispatch (uint16_t count)
 {
     for (int i = 0; i < count; i++)
     {
-        event_t event;
-        if (!event_pop (&event))
+        event_record_t record;
+        if (!event_pop (&record))
             break;
         
-        if (event >= __EVENT_MAX)
+        if (record.event >= __EVENT_MAX)
         {
-            default_handler (event);
+            default_handler (record.event);
             continue;
         }
         
-        event_handler_t handler = event_handlers[event];
-        if (handler != NULL)
-            handler (event);
-        else
-            default_handler (event);
-    }
-}
+        event_handler_t handler = event_handlers[record.event];
+        void * handler_context = event_handlers_contexts [record.event];
 
-void event_dispatch_default ()
-{
-    for (int i = 0; i < EVENT_DISPATCH_EVENT_COUNT; i++)
-    {
-        event_t event;
-        if (!event_pop (&event))
-            break;
-        
-        if (event >= __EVENT_MAX)
-        {
-            default_handler (event);
-            continue;
-        }
-        
-        event_handler_t handler = event_handlers[event];
         if (handler != NULL)
-            handler (event);
+        {
+            if (!handler (handler_context, record.context))
+                debug_raise_fault (FAULT_HANDLER_RETVAL); // TODO: from?
+        }
         else
-            default_handler (event);
+            default_handler (record.event);
     }
 }
 
 // ------- Private defenitions ------- //
-static bool event_pop (event_t* event)
+static bool event_pop (event_record_t* event)
 {
-    if (!event_mask)
+    if (queue_head == queue_tail)
         return false;
     
-    event_t popped = __builtin_ctz(event_mask);
-    event_mask &= ~(1ULL << popped);
-    *event = popped;
-    
+    *event = event_queue [queue_head];
+    queue_head = (queue_head + 1) & (EVENT_QUEUE_SIZE - 1);
+
     return true;
 }

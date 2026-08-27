@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
-
-#include "scheduler.h"
+#include <stdbool.h>
 
 /**
  * What it should do:
@@ -11,6 +10,10 @@
  * 
  * 
  */
+
+#define SCHEDULE_TABLE_SIZE 32
+
+typedef void (*schedule_handler_t)(void);
 
 typedef struct 
 {
