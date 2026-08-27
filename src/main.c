@@ -39,6 +39,7 @@ int main ()
         
         // launch handlers raised by software
         // TODO: event_manager ();
+        event_dispatch (5);
 
         // launch low priority tasks
         // TODO: background ();

@@ -4,8 +4,8 @@
 
 bool command_init ();
 
-bool command_cli_callback (void * context);
-bool command_proto_callback (void * context);
+bool command_cli_callback (void * dest, void * context);
+bool command_proto_callback (void * dest, void * context);
 
 
 

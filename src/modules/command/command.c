@@ -30,9 +30,10 @@ bool command_cli_callback (void * dest, void * context)
     return true;
 }
 
-bool command_proto_callback (void * context)
+bool command_proto_callback (void * dest, void * context)
 {
     (void)context;
+    (void)dest;
     return false;
 }
 
