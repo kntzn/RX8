@@ -1,23 +1,17 @@
+#include <string.h>
+
 #include "modules/command/command_cli_parser.h"
-
-#include <stm32f303xc.h>
-
-// string "xxx xx xxxx" -> array of ptrs -> converter (ptr_x) ~= dict -> form commands
-
-//void command_parse (cli_interface_t* cli, command_t *command_t)
-//{
-    //cli->read ()
-//}
+#include "modules/command/command_types.h"
 
 #define PARSER_MAX_ARGS 8
 
 inline bool command_symbol_is_split_symbol (uint8_t symbol);
 bool command_console_line_split (uint8_t * line, size_t len, size_t * argc, char ** argv);
 
-void dummy()
-{}
+command_t command_parse_args (size_t argc, char ** argv);
+command_domain_t command_parse_domain (const char * domain_str);
 
-bool command_console_line_parse (console_line_t line)
+bool command_console_line_parse (console_line_t line, command_t* command)
 {
     size_t argc;
     char* argv [PARSER_MAX_ARGS]; 
@@ -25,17 +19,10 @@ bool command_console_line_parse (console_line_t line)
     if (!command_console_line_split (line.line, line.len, &argc, argv))
         return false;
 
-    dummy();
+    *command = command_parse_args (argc, argv);
 
     return true;
 }
-
-/**
- * TODO list:
- * 1. find first symbol
- * 2. set argv
- * 3. i
- */
 
 bool command_console_line_split (uint8_t * line, size_t len, size_t * argc, char ** argv)
 {
@@ -82,12 +69,49 @@ bool command_console_line_split (uint8_t * line, size_t len, size_t * argc, char
 
     *argc = arg_counter;
 
-    __BKPT();
-
     return true;
 }
 
 inline bool command_symbol_is_split_symbol (uint8_t symbol)
 {
     return symbol == ' ' || symbol == '\t' || symbol == '\0';
+}
+
+command_domain_t command_parse_domain (const char * domain_str)
+{
+    if (!strcmp (domain_str, "traction"))
+        return DOMAIN_TRACTION;
+    if (!strcmp (domain_str, "lights"))
+        return DOMAIN_LIGHTS;
+    if (!strcmp (domain_str, "radio"))
+        return DOMAIN_RADIO;
+
+    return DOMAIN_UNKNOWN;
+}
+
+command_t command_parse_args (size_t argc, char ** argv)
+{
+    command_t command;
+    command_domain_t domain = command_parse_domain (argv[0]);
+
+    (void)argc;
+
+    switch (domain)
+    {
+    case DOMAIN_TRACTION:
+        //parse_traction (argc-1, argv+1)
+        break;
+    case DOMAIN_LIGHTS:
+        // parse_lights
+        break;
+    case DOMAIN_RADIO:
+        // parse_radio
+        break;
+    default:
+        break;
+    }
+
+    command.domain = domain;
+
+    return command;
 }

@@ -24,6 +24,8 @@ typedef struct {
 
 bool console_init (console_t* self, byte_stream_t* stream);
 
-bool console_take_line (console_t* self, console_line_t* line);
+bool console_get_line (console_t* self, console_line_t* line);
+
+bool console_release_line (console_t* self);
 
 void console_rx_callback (void* context);

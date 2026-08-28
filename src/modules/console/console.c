@@ -26,7 +26,7 @@ bool console_init (console_t* self, byte_stream_t* stream)
     return ok;
 }
 
-bool console_take_line (console_t* self, console_line_t* input_line)
+bool console_get_line (console_t* self, console_line_t* input_line)
 {
     if (self == NULL || input_line == NULL)
         return false;
@@ -37,8 +37,21 @@ bool console_take_line (console_t* self, console_line_t* input_line)
     input_line->line = self->command_line;
     input_line->len = self->cursor;
     
+    
+    return true;
+}
+
+bool console_release_line (console_t* self)
+{
+    if (self == NULL)
+        return false;
+
+    if (!self->command_pending)
+        return false;
+    
     self->cursor = 0;
     self->command_pending = false;
+
     return true;
 }
 
