@@ -90,6 +90,7 @@ inline bool console_is_CR (uint8_t byte)
 
 bool console_echo (console_t * self, uint8_t byte)
 {
+    // TODO: \t echo should be \t
     if (console_is_special (byte))
     {
         switch (byte)

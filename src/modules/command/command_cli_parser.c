@@ -40,48 +40,47 @@ bool command_console_line_parse (console_line_t line)
 bool command_console_line_split (uint8_t * line, size_t len, size_t * argc, char ** argv)
 {
     size_t linec = 0;
-    
+    size_t arg_counter = 0;
+
     if (argc == NULL || argv == NULL)
         return false;
     
     // reset argument counter;
-    *argc = 0;    
+    arg_counter = 0;    
 
     // drop heading spaces
     for (; linec < len; linec++)
-    {
-        // on first non-space symbol occurance
         if (! command_symbol_is_split_symbol (line [linec]))
-        {
-            // set first argument
-            if (*argc < PARSER_MAX_ARGS-1)
-                argv [*argc++] = (char*)(line + linec);
-            
-            // continue parsing with at least 2nd char
-            linec++;
             break;
-        }
-    }
 
-    // continue splitting until EOL
+    // replace all split symb with \0
+    for (size_t i = linec; i < len; i++)
+        if (command_symbol_is_split_symbol (line [i]))
+            line [i] = '\0';
+
+    // continue with splitting until EOL
     for (; linec < len; linec++)
     {   
-        // if this is space
-        if (command_symbol_is_split_symbol (line [linec]))
+        // if first symbol in line is non-split, set first arg
+        if (linec == 0)
         {
-            line [linec] = '\0';
+            if (arg_counter < PARSER_MAX_ARGS-1)
+                argv [arg_counter++] = (char*)(line + linec);
         }
         else
         {
-            if (command_symbol_is_split_symbol (line [linec-1]))
-                if (*argc < PARSER_MAX_ARGS-1)
-                    argv [*argc++] = (char*)(line + linec);
+            if (command_symbol_is_split_symbol (line [linec-1]) &&
+                !command_symbol_is_split_symbol (line [linec]))
+                if (arg_counter < PARSER_MAX_ARGS-1)
+                    argv [arg_counter++] = (char*)(line + linec);
         }
             
     }
 
     // console guaranties to have at least one excessive symbol at the end of buffer
     line [linec+1] = '\0';
+
+    *argc = arg_counter;
 
     __BKPT();
 
