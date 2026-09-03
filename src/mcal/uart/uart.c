@@ -40,7 +40,7 @@ bool uart_init (uart_instance_t * self, USART_TypeDef* uart, uint32_t clock_freq
 
     self->instance->CR1 |= USART_CR1_UE;
 
-    static_assert (IS_POWER_OF_2 (UART_BUFFER_SIZE));
+    static_assert (IS_POWER_OF_2 (UART_BUFFER_SIZE)); // TODO: make assert static (compile_time?)
 
     if (!(ring_buffer_init (&self->rx_buffer, self->rx_data, UART_BUFFER_SIZE)))
         return false;
