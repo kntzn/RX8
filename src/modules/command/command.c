@@ -39,5 +39,5 @@ bool command_proto_callback (void * dest, void * context)
 bool command_execute (command_t command)
 {
     (void)command;
-    return true;
+    return false;
 }

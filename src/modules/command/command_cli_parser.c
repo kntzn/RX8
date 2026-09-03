@@ -19,7 +19,7 @@ bool command_console_line_parse (console_line_t line, command_t* command)
     if (!command_console_line_split (line.line, line.len, &argc, argv))
         return false;
 
-    *command = command_parse_args (argc, argv);
+    (void)command;
 
     return true;
 }
@@ -87,31 +87,4 @@ command_domain_t command_parse_domain (const char * domain_str)
         return DOMAIN_RADIO;
 
     return DOMAIN_UNKNOWN;
-}
-
-command_t command_parse_args (size_t argc, char ** argv)
-{
-    command_t command;
-    command_domain_t domain = command_parse_domain (argv[0]);
-
-    (void)argc;
-
-    switch (domain)
-    {
-    case DOMAIN_TRACTION:
-        //parse_traction (argc-1, argv+1)
-        break;
-    case DOMAIN_LIGHTS:
-        // parse_lights
-        break;
-    case DOMAIN_RADIO:
-        // parse_radio
-        break;
-    default:
-        break;
-    }
-
-    command.domain = domain;
-
-    return command;
 }
