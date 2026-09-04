@@ -3,7 +3,8 @@
 #include <stm32f303xc.h>
 
 #include "runtime.h"
-#include "uart.h"
+#include "mcal/uart/uart.h"
+#include "mcal/spi/spi.h"
 #include "board.h"
 #include "gpio.h"
 #include "pinmap.h"
@@ -60,6 +61,7 @@ static bool application_init (void)
     static console_t console;
     static uart_instance_t hc12_uart;
     static uart_instance_t console_uart;
+    static spi_instance_t cc1101_spi;
 
     __disable_irq();
     // ----- Place init functions here ----- //
@@ -77,12 +79,9 @@ static bool application_init (void)
     // Periph
     uart_init (&console_uart, CONSOLE_UART_INSTANCE, SystemCoreClock, 115200);
     uart_init (&hc12_uart, HC12_UART_INSTANCE, SystemCoreClock, 9600);
-
+    spi_init (&cc1101_spi, SPI1);
+    
     // Drivers
-    NVIC_ClearPendingIRQ (USART1_IRQn);
-    NVIC_SetPriority (USART1_IRQn, 0);
-    NVIC_EnableIRQ (USART1_IRQn);
-
     hc12_init (&hc12, &hc12_uart, &hc12_set);
     console_init (&console, uart_get_stream (&console_uart));
 
@@ -95,6 +94,11 @@ static bool application_init (void)
     // ---------- Event binding ---------- //
 
     event_register_handler (EVENT_CONSOLE_LINE_READY, command_cli_callback, NULL);
+
+    
+    NVIC_ClearPendingIRQ (USART1_IRQn);
+    NVIC_SetPriority (USART1_IRQn, 0);
+    NVIC_EnableIRQ (USART1_IRQn);
 
     __enable_irq();
 

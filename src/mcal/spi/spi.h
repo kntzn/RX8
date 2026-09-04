@@ -1,14 +1,27 @@
 #include <stm32f303xc.h>
+#include "mcal/gpio/gpio.h"
 
-typedef struct
+typedef enum
+{
+    SPI_MODE_0 = 0,
+    SPI_MODE_1,    
+    SPI_MODE_2,
+    SPI_MODE_3   
+} spi_mode_t;
+
+typedef struct 
 {
     SPI_TypeDef* instance;
+    gpio_t * cs_pin;
+    spi_mode_t mode;
+} spi_device_t;
 
-    // counter rx / tx
-    // irq_mode_rx None/IRQ/DMA
-    // irq_mode_tx None/IRQ/DMA
 
-} spi_instance_t;
+/**
+ * @brief configure the spi peripherial
+ * @param spi_device_t * - spi device structure that should contain
+ */
+bool spi_init (spi_device_t * self);
 
 // CC1101
 // CPOL = 0
