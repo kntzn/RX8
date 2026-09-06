@@ -21,32 +21,10 @@
 
 static bool application_init (void);
 
-bool execute_command = false;
-
 int main ()
 {
     if (!application_init())
         return 1;
-
-    gpio_t cc1101_cs;
-    if (!gpio_output_init (&cc1101_cs, GPIOB, 0, GPIO_STATE_HIGH))
-        return 1;
-
-    gpio_af_init (NULL, GPIOA, 5U, 5U);
-    gpio_af_init (NULL, GPIOA, 6U, 5U);
-    gpio_af_init (NULL, GPIOA, 7U, 5U);
-
-    spi_device_t cc1101 = { .cs_pin = NULL,
-                            .instance = SPI1,
-                            .max_frequency = 2000000UL,
-                            .mode = SPI_MODE_0 };
-
-    spi_init (&cc1101);
-
-    gpio_t dbg0;
-    gpio_output_init (&dbg0, DEBUG_PIN0_PORT, DEBUG_PIN0_PIN, GPIO_STATE_LOW);
-
-
 
     while (true)
     {
@@ -61,20 +39,7 @@ int main ()
         event_dispatch (5);
 
         // launch low priority tasks
-        // TODO: background ();
-
-        if (execute_command)
-        {
-            execute_command = false;
-
-            uint8_t buffer_out [] = { 0xDE, 0xAD, 0xBE, 0xEF, 0x77, 0b10101010,  0b10101010,  0b10101010,  0b10101010,  0b10101010,  };
-            
-            gpio_write (&cc1101_cs, GPIO_STATE_LOW);
-            spi_transfer_blocking (&cc1101, buffer_out, NULL, 10);
-            gpio_write (&cc1101_cs, GPIO_STATE_HIGH);
-        }
-
-        
+        // TODO: background ();        
     }    
     
     //runtime_run_once();    
@@ -90,6 +55,11 @@ static bool application_init (void)
     static console_t console;
     static uart_instance_t hc12_uart;
     static uart_instance_t console_uart;
+    static gpio_t cc1101_cs;
+    static spi_device_t cc1101_spi = { .cs_pin = &cc1101_cs,
+                                       .instance = SPI1,
+                                       .max_frequency = 2000000UL,
+                                       .mode = SPI_MODE_0 }; 
 
     __disable_irq();
     // ----- Place init functions here ----- //
@@ -105,9 +75,17 @@ static bool application_init (void)
     gpio_af_init (NULL, CONSOLE_UART_PORT, CONSOLE_UART_RX_PIN, CONSOLE_UART_RX_AF);
     gpio_af_init (NULL, CONSOLE_UART_PORT, CONSOLE_UART_TX_PIN, CONSOLE_UART_TX_AF);
 
+    gpio_af_init (NULL, GPIOA, 5U, 5U);
+    gpio_af_init (NULL, GPIOA, 6U, 5U);
+    gpio_af_init (NULL, GPIOA, 7U, 5U);
+
+    gpio_output_init (&cc1101_cs, GPIOB, 0, GPIO_STATE_HIGH);
+
     // Periph
     uart_init (&console_uart, CONSOLE_UART_INSTANCE, SystemCoreClock, 115200);
     uart_init (&hc12_uart, HC12_UART_INSTANCE, SystemCoreClock, 9600);
+
+    spi_init (&cc1101_spi);
 
     // Drivers
     hc12_init (&hc12, &hc12_uart, &hc12_set);
@@ -123,7 +101,6 @@ static bool application_init (void)
 
     event_register_handler (EVENT_CONSOLE_LINE_READY, command_cli_callback, NULL);
 
-    
     NVIC_ClearPendingIRQ (USART1_IRQn);
     NVIC_SetPriority (USART1_IRQn, 0);
     NVIC_EnableIRQ (USART1_IRQn);
