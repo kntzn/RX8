@@ -20,12 +20,11 @@ bool spi_configure (spi_device_t * self)
     // disable SPI during setup
     self->instance->CR1 &= ~SPI_CR1_SPE;
 
-    // disable SPI during setup
-    self->instance->CR1 &= ~SPI_CR1_SPE;
-
-    self->instance->CR1 &= ~(SPI_CR1_CPHA | SPI_CR1_CPOL);
+    // always use master mode
+    self->instance->CR1 |= SPI_CR1_MSTR;
 
     // set up CPOL / CPHA
+    self->instance->CR1 &= ~(SPI_CR1_CPHA | SPI_CR1_CPOL);
     switch (self->mode)
     {
         case SPI_MODE_0:
@@ -43,25 +42,29 @@ bool spi_configure (spi_device_t * self)
             break;
     }
 
-
-    // TODO [CRITICAL]: replace system core clock with get_spi_clock
-
     // set up prescaler
     uint32_t prescaler;
     for (prescaler = 0; prescaler < 8; prescaler++)
     {
         uint32_t divider = 2UL << prescaler;
-    
+        // TODO [CRITICAL]: replace system core clock with get_spi_clock
         if ((SystemCoreClock / divider) <= self->max_frequency)
             break;
     }
-    
     // Can not fit desired frequency
     if (prescaler == 8)
         return false;
     
+    // threshold & data size (8bit)
+    self->instance->CR2 &= ~SPI_CR2_DS_Msk;
+    self->instance->CR2 |= ((8U-1U) << SPI_CR2_DS_Pos);
+    self->instance->CR2 |= SPI_CR2_FRXTH;
+
     self->instance->CR1 &= ~SPI_CR1_BR_Msk;
     self->instance->CR1 |= (prescaler << SPI_CR1_BR_Pos);
+
+    // enable SPI on setup completion
+    self->instance->CR1 |= SPI_CR1_SPE;
 
     return true;
 }
@@ -80,20 +83,22 @@ bool spi_transfer_blocking (spi_device_t * self, uint8_t * from, uint8_t * to, s
         while (!(self->instance->SR & SPI_SR_TXE))
             ;
 
-        self->instance->DR = from? from [i] : 0xFF;
+        *(volatile uint8_t *) &self->instance->DR = from? from [i] : 0xFF;
         
         while (!(self->instance->SR & SPI_SR_RXNE))
             ;
 
+
+        uint8_t rx_byte = *(volatile uint8_t *) &self->instance->DR;
         if (to)
-            to [i] = self->instance->DR;
+            to [i] = rx_byte;
         
     }
 
     while (!(self->instance->SR & SPI_SR_TXE))
         ;
 
-    while (!(self->instance->SR & SPI_SR_BSY))
+    while (self->instance->SR & SPI_SR_BSY)
         ;
 
     return true;

@@ -66,7 +66,7 @@ int main ()
         {
             execute_command = false;
 
-            __BKPT();
+            //__BKPT();
 
             gpio_write (&cc1101_cs, GPIO_STATE_LOW);
             spi_transfer_blocking (&cc1101, NULL, NULL, 5);
