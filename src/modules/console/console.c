@@ -12,6 +12,9 @@ const char * console_get_response (uint8_t byte);
 
 bool console_echo (console_t * self, uint8_t byte);
 
+extern bool execute_command;
+
+
 bool console_init (console_t* self, byte_stream_t* stream)
 {
     bool ok = true;
@@ -60,6 +63,8 @@ void console_rx_callback (void* context)
             else if (console_is_CR (incomming_byte))
             {
                 self->command_pending = true; 
+
+                execute_command = true;
                 // TODO: raise event 
             }
             else
