@@ -11,6 +11,8 @@
 #include "hc12.h"
 #include "console.h"
 
+#include "drivers/cc1101/cc1101.h"
+
 #include "debug.h"
 #include "byte_stream.h"
 
@@ -60,6 +62,10 @@ static bool application_init (void)
                                        .instance = SPI1,
                                        .max_frequency = 2000000UL,
                                        .mode = SPI_MODE_0 }; 
+    static cc1101_t cc1101 = {
+                            .spi = &cc1101_spi,
+                            .cs = &cc1101_cs
+                            };
 
     __disable_irq();
     // ----- Place init functions here ----- //
@@ -89,6 +95,8 @@ static bool application_init (void)
 
     // Drivers
     hc12_init (&hc12, &hc12_uart, &hc12_set);
+    cc1101_init (&cc1101, &cc1101_cs);
+
     console_init (&console, uart_get_stream (&console_uart));
 
     // ---------- Notification binding ---------- //
@@ -99,7 +107,9 @@ static bool application_init (void)
     
     // ---------- Event binding ---------- //
 
-    event_register_handler (EVENT_CONSOLE_LINE_READY, command_cli_callback, NULL);
+//    event_register_handler (EVENT_CONSOLE_LINE_READY, command_cli_callback, NULL);
+    event_register_handler (EVENT_CONSOLE_LINE_READY, cc1101_handler, &cc1101);
+
 
     NVIC_ClearPendingIRQ (USART1_IRQn);
     NVIC_SetPriority (USART1_IRQn, 0);

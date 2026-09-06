@@ -46,6 +46,7 @@ void event_dispatch (uint16_t count);
  * 
  * @param event Event id
  * @param handler Handler function
+ * @param context recepient of event 
  * 
  * @example event_queue_register_event_handler (RX_PACKET_AVAILABLE, process_packet);
  */

@@ -25,8 +25,8 @@ bool command_cli_callback (void * dest, void * context)
 
     if (!console_take_line (source, &console_input))
         return false;
-    if (!command_console_line_parse (console_input))
-        return false;
+    //if (!command_console_line_parse (console_input))
+    //    return false;
 
 
 

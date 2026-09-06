@@ -1,4 +1,9 @@
+#pragma once
+
+#include <stddef.h>
+
 #include <stm32f303xc.h>
+
 #include "mcal/gpio/gpio.h"
 
 typedef enum

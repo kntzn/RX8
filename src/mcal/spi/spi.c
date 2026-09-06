@@ -80,7 +80,7 @@ bool spi_transfer_blocking (spi_device_t * self, uint8_t * from, uint8_t * to, s
 
     size_t rx_ptr = 0, tx_ptr = 0;
     // kickstart the transaction (packer Workaround)
-    while (tx_ptr < 4)
+    while (tx_ptr < 4 && tx_ptr < len)
     {
         *(volatile uint8_t *) &self->instance->DR = from ? from[tx_ptr] : 0x00;
         tx_ptr++;

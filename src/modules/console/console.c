@@ -5,6 +5,8 @@
 
 #include "utils.h"
 
+#include "core/event/event.h"
+
 inline bool console_is_special (uint8_t byte);
 inline bool console_is_BS (uint8_t byte);
 inline bool console_is_CR (uint8_t byte);
@@ -26,14 +28,16 @@ bool console_init (console_t* self, byte_stream_t* stream)
 
 bool console_take_line (console_t* self, console_line_t* input_line)
 {
-    if (self == NULL || input_line == NULL)
-        return false;
+    // TODO: return back
+   // if (self == NULL || input_line == NULL)
+   //     return false;
 
-    if (!self->command_pending)
-        return false;
+   // if (!self->command_pending)
+   //     return false;
 
-    input_line->line = self->command_line;
-    input_line->len = self->cursor;
+    //input_line->line = self->command_line;
+    //input_line->len = self->cursor;
+    (void)input_line;
     
     self->cursor = 0;
     self->command_pending = false;
@@ -60,7 +64,8 @@ void console_rx_callback (void* context)
             else if (console_is_CR (incomming_byte))
             {
                 self->command_pending = true; 
-
+                console_take_line (self, NULL);
+                event_raise (EVENT_CONSOLE_LINE_READY, self);
                 // TODO: raise event 
             }
             else
