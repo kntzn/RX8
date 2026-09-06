@@ -21,8 +21,21 @@
 
 static bool application_init (void);
 
+bool execute_command = false;
+
 int main ()
 {
+    gpio_t cc1101_cs;
+    gpio_output_init (&cc1101_cs, GPIOB, 0, GPIO_STATE_HIGH);
+
+    spi_device_t cc1101 = { .cs_pin = NULL,
+                            .instance = SPI2,
+                            .max_frequency = 2000000UL,
+                            .mode = SPI_MODE_0 };
+
+    spi_init (&cc1101);
+
+    
 
     gpio_t dbg0;
     gpio_output_init (&dbg0, DEBUG_PIN0_PORT, DEBUG_PIN0_PIN, GPIO_STATE_LOW);
@@ -44,6 +57,15 @@ int main ()
 
         // launch low priority tasks
         // TODO: background ();
+
+        if (execute_command)
+        {
+            execute_command = false;
+
+            gpio_write (&cc1101_cs, GPIO_STATE_LOW);
+            spi_transfer_blocking (&cc1101, NULL, NULL, 5);
+            gpio_write (&cc1101_cs, GPIO_STATE_HIGH);
+        }
 
         __WFI ();
     }    

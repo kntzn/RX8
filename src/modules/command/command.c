@@ -5,6 +5,8 @@
 bool command_console_line_parse (console_line_t line);
 bool command_console_line_split (uint8_t * line, size_t len, uint8_t ** strings);
 
+extern bool execute_command;
+
 /*
 static char* known_words[] = \
 {
@@ -26,7 +28,9 @@ bool command_cli_callback (void * dest, void * context)
         return false;
     if (!command_console_line_parse (console_input))
         return false;
-    
+
+    execute_command = true;
+
     return true;
 }
 
