@@ -14,6 +14,7 @@ typedef struct
     SPI_TypeDef* instance;
     gpio_t * cs_pin;
     spi_mode_t mode;
+    uint32_t max_frequency;
 } spi_device_t;
 
 
@@ -22,6 +23,8 @@ typedef struct
  * @param spi_device_t * - spi device structure that should contain
  */
 bool spi_init (spi_device_t * self);
+
+bool spi_transfer_blocking (spi_device_t * self, uint8_t * from, uint8_t * to, size_t len);
 
 // CC1101
 // CPOL = 0

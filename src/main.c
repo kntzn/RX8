@@ -61,7 +61,7 @@ static bool application_init (void)
     static console_t console;
     static uart_instance_t hc12_uart;
     static uart_instance_t console_uart;
-    static spi_instance_t cc1101_spi;
+    static spi_device_t cc1101_spi;
 
     __disable_irq();
     // ----- Place init functions here ----- //
@@ -79,7 +79,7 @@ static bool application_init (void)
     // Periph
     uart_init (&console_uart, CONSOLE_UART_INSTANCE, SystemCoreClock, 115200);
     uart_init (&hc12_uart, HC12_UART_INSTANCE, SystemCoreClock, 9600);
-    spi_init (&cc1101_spi, SPI1);
+    spi_init (&cc1101_spi);
     
     // Drivers
     hc12_init (&hc12, &hc12_uart, &hc12_set);
