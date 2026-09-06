@@ -42,6 +42,10 @@ bool spi_configure (spi_device_t * self)
             break;
     }
 
+    // set up software CS:
+    self->instance->CR1 |= SPI_CR1_SSI |
+                           SPI_CR1_SSM;
+
     // set up prescaler
     uint32_t prescaler;
     for (prescaler = 0; prescaler < 8; prescaler++)
@@ -73,30 +77,31 @@ bool spi_transfer_blocking (spi_device_t * self, uint8_t * from, uint8_t * to, s
 {
     if (!self)
         return false;
-    
-    // toggle off for now (would be toggled in executing code before CS)
-    //if (!spi_configure (self))
-    //    return false;
-    
-    for (size_t i = 0; i < len; i++)
+
+    size_t rx_ptr = 0, tx_ptr = 0;
+    // kickstart the transaction (packer Workaround)
+    while (tx_ptr < 4)
     {
-        while (!(self->instance->SR & SPI_SR_TXE))
-            ;
-
-        *(volatile uint8_t *) &self->instance->DR = from? from [i] : 0xFF;
-        
-        while (!(self->instance->SR & SPI_SR_RXNE))
-            ;
-
-
-        uint8_t rx_byte = *(volatile uint8_t *) &self->instance->DR;
-        if (to)
-            to [i] = rx_byte;
-        
+        *(volatile uint8_t *) &self->instance->DR = from ? from[tx_ptr] : 0x00;
+        tx_ptr++;
     }
 
-    while (!(self->instance->SR & SPI_SR_TXE))
-        ;
+    while (tx_ptr < len || rx_ptr < len)
+    {    
+        if ((tx_ptr < len) && (self->instance->SR & SPI_SR_TXE))
+        {
+            *(volatile uint8_t *) &self->instance->DR = from? from [tx_ptr] : 0x00;
+            tx_ptr++;
+        }
+
+        if ((rx_ptr < len) && (self->instance->SR & SPI_SR_RXNE))
+        {
+            uint8_t rx_byte = *(volatile uint8_t *) &self->instance->DR;
+            if (to)
+                to [rx_ptr] = rx_byte;
+            rx_ptr++;  
+        }
+    }
 
     while (self->instance->SR & SPI_SR_BSY)
         ;

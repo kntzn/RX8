@@ -29,7 +29,8 @@ int main ()
         return 1;
 
     gpio_t cc1101_cs;
-    gpio_output_init (&cc1101_cs, GPIOB, 0, GPIO_STATE_HIGH);
+    if (!gpio_output_init (&cc1101_cs, GPIOB, 0, GPIO_STATE_HIGH))
+        return 1;
 
     gpio_af_init (NULL, GPIOA, 5U, 5U);
     gpio_af_init (NULL, GPIOA, 6U, 5U);
@@ -66,10 +67,10 @@ int main ()
         {
             execute_command = false;
 
-            //__BKPT();
-
+            uint8_t buffer_out [] = { 0xDE, 0xAD, 0xBE, 0xEF, 0x77, 0b10101010,  0b10101010,  0b10101010,  0b10101010,  0b10101010,  };
+            
             gpio_write (&cc1101_cs, GPIO_STATE_LOW);
-            spi_transfer_blocking (&cc1101, NULL, NULL, 5);
+            spi_transfer_blocking (&cc1101, buffer_out, NULL, 10);
             gpio_write (&cc1101_cs, GPIO_STATE_HIGH);
         }
 
@@ -94,6 +95,7 @@ static bool application_init (void)
     // ----- Place init functions here ----- //
 
     board_init ();
+    debug_init ();
 
     // GPIO
     gpio_output_init (&hc12_set, HC12_SET_PORT, HC12_SET_PIN, GPIO_STATE_HIGH);

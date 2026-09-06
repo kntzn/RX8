@@ -123,8 +123,20 @@ gpio_state_t gpio_read (const gpio_t* self)
 
 void gpio_write (const gpio_t* self, gpio_state_t level)
 {
-    (void)self; // TODO
-    (void)level;
+    
+    if (self == NULL)
+        return;
+
+    if (level == GPIO_STATE_HIGH)
+    {
+        self->port->BSRR = (1UL << self->pin);
+        return;
+    }
+    if (level == GPIO_STATE_LOW)
+    {
+        self->port->BSRR = (1UL << (self->pin + 16U));
+        return;
+    }
 }
 
 void gpio_toggle (const gpio_t* self)
