@@ -41,7 +41,9 @@ int main ()
         event_dispatch (5);
 
         // launch low priority tasks
-        // TODO: background ();        
+        // TODO: background ();     
+        
+        __WFI();
     }    
     
     //runtime_run_once();    
@@ -57,6 +59,7 @@ static bool application_init (void)
     static console_t console;
     static uart_instance_t hc12_uart;
     static uart_instance_t console_uart;
+    static gpio_t cc1101_miso;
     static gpio_t cc1101_cs;
     static spi_device_t cc1101_spi = { .cs_pin = &cc1101_cs,
                                        .instance = SPI1,
@@ -82,7 +85,7 @@ static bool application_init (void)
     gpio_af_init (NULL, CONSOLE_UART_PORT, CONSOLE_UART_TX_PIN, CONSOLE_UART_TX_AF);
 
     gpio_af_init (NULL, GPIOA, 5U, 5U);
-    gpio_af_init (NULL, GPIOA, 6U, 5U);
+    gpio_af_init (&cc1101_miso, GPIOA, 6U, 5U);
     gpio_af_init (NULL, GPIOA, 7U, 5U);
 
     gpio_output_init (&cc1101_cs, GPIOB, 0, GPIO_STATE_HIGH);
@@ -95,7 +98,7 @@ static bool application_init (void)
 
     // Drivers
     hc12_init (&hc12, &hc12_uart, &hc12_set);
-    cc1101_init (&cc1101, &cc1101_cs);
+    cc1101_init (&cc1101, &cc1101_cs, &cc1101_miso);
 
     console_init (&console, uart_get_stream (&console_uart));
 

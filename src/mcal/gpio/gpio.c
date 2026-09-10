@@ -117,13 +117,16 @@ bool gpio_analog_init (gpio_t* self, GPIO_TypeDef* port, uint32_t pin)
 
 gpio_state_t gpio_read (const gpio_t* self)
 {
-    (void)self; // TODO
-    return GPIO_STATE_LOW;
+    if (!self)
+        return GPIO_STATE_LOW;
+    if ((self->port->IDR & (1U << self->pin)))
+        return GPIO_STATE_HIGH;
+    else
+        return GPIO_STATE_LOW;
 }
 
 void gpio_write (const gpio_t* self, gpio_state_t level)
 {
-    
     if (self == NULL)
         return;
 
