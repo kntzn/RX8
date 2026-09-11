@@ -86,12 +86,32 @@ typedef enum
 } cc1101_status_register_t;
 
 
-
-
-
-
-
-
+typedef enum
+{
+    SLEEP            = 0x00, // SLEEP
+    IDLE             = 0x01, // IDLE
+    XOFF             = 0x02, // XOFF
+    VCOON_MC         = 0x03, // MANCAL
+    REGON_MC         = 0x04, // MANCAL
+    MANCAL           = 0x05, // MANCAL
+    VCOON            = 0x06, // FS_WAKEUP
+    REGON            = 0x07, // FS_WAKEUP
+    STARTCAL         = 0x08, // CALIBRATE
+    BWBOOST          = 0x09, // SETTLING
+    FS_LOCK          = 0x0A, // SETTLING
+    IFADCON          = 0x0B, // SETTLING
+    ENDCAL           = 0x0C, // CALIBRATE
+    RX               = 0x0D, // RX
+    RX_END           = 0x0E, // RX
+    RX_RST           = 0x0F, // RX
+    TXRX_SWITCH      = 0x10, // TXRX_SETTLING
+    RXFIFO_OVERFLOW  = 0x11, // RXFIFO_OVERFLOW
+    FSTXON           = 0x12, // FSTXON
+    TX               = 0x13, // TX
+    TX_END           = 0x14, // TX
+    RXTX_SWITCH      = 0x15, // RXTX_SETTLING
+    TXFIFO_UNDERFLOW = 0x16  // TXFIFO_UNDERFLOW
+} cc1101_state_t;
 
 
 

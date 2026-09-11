@@ -5,6 +5,12 @@
 #define CC1101_READ  0x80
 #define CC1101_WRITE (0)
 
+typedef struct
+{
+    bool chip_ready;
+    cc1101_state_t state;
+    uint8_t fifo_bytes;
+} cc1101_chip_status_byte_t;
 
 
 bool cc1101_strobe      (cc1101_t * self, uint8_t command);
@@ -13,7 +19,6 @@ bool cc1101_write_reg   (cc1101_t * self, uint8_t address, uint8_t value);
 bool cc1101_read_status (cc1101_t * self, uint8_t address, uint8_t * value);
 bool cc1101_write_burst (cc1101_t * self, uint8_t address, uint8_t value);
 bool cc1101_read_burst  (cc1101_t * self, uint8_t address, uint8_t * value);
-
 
 bool cc1101_init (cc1101_t * self, gpio_t * cs, gpio_t * gdo1)
 {
@@ -36,12 +41,39 @@ bool cc1101_handler (void * dest, void * context)
     return true;
 }
 
-bool cc1101_strobe (cc1101_t * self, uint8_t command);
+bool cc1101_strobe (cc1101_t * self, uint8_t command)
+{
+    uint8_t tx_buffer = 0;
+    uint8_t rx_buffer = 0;
+
+    //uint8_t marcstate_byte = 0;
+
+    tx_buffer = CC1101_BURST | command;
+
+    gpio_write (self->cs, GPIO_STATE_LOW);
+    
+    // part of cc1101 protocol (CS low -> wait for miso low -> transfer)
+    while (gpio_read (self->gdo1) == GPIO_STATE_HIGH)
+        ;
+
+    if (!spi_transfer_blocking (self->spi, &tx_buffer, &rx_buffer, 1))
+    {
+        gpio_write (self->cs, GPIO_STATE_HIGH);
+        return false;
+    }
+
+    gpio_write (self->cs, GPIO_STATE_HIGH);
+
+    //marcstate_byte = rx_buffer [0];
+    //*value = rx_buffer [1];
+
+    return true;   
+}
 bool cc1101_read_reg (cc1101_t * self, uint8_t address, uint8_t * value)
 {
     uint8_t tx_buffer [2] = { 0, 0 };
     uint8_t rx_buffer [2] = { 0, 0 };
-    uint8_t marcstate_byte = 0;
+    //uint8_t marcstate_byte = 0;
 
     tx_buffer [0] = CC1101_READ | CC1101_BURST | address;
 
@@ -51,17 +83,47 @@ bool cc1101_read_reg (cc1101_t * self, uint8_t address, uint8_t * value)
     while (gpio_read (self->gdo1) == GPIO_STATE_HIGH)
         ;
 
-    spi_transfer_blocking (self->spi, tx_buffer, rx_buffer, 2);
+    if (!spi_transfer_blocking (self->spi, tx_buffer, rx_buffer, 2))
+    {
+        gpio_write (self->cs, GPIO_STATE_HIGH);
+        return false;
+    }
 
     gpio_write (self->cs, GPIO_STATE_HIGH);
 
-    marcstate_byte = rx_buffer [0];
+    //marcstate_byte = rx_buffer [0];
     *value = rx_buffer [1];
 
     return true;   
 }
 
-bool cc1101_write_reg (cc1101_t * self, uint8_t address, uint8_t value);
-bool cc1101_read_status (cc1101_t * self, uint8_t address, uint8_t * value);
+bool cc1101_write_reg (cc1101_t * self, uint8_t address, uint8_t value)
+{
+    uint8_t tx_buffer [2] = { 0, 0 };
+    uint8_t rx_buffer [2] = { 0, 0 };
+    //uint8_t marcstate_byte = 0;
+
+    tx_buffer [0] = CC1101_WRITE | CC1101_BURST | address;
+    tx_buffer [1] = value;
+
+    gpio_write (self->cs, GPIO_STATE_LOW);
+    
+    // part of cc1101 protocol (CS low -> wait for miso low -> transfer)
+    while (gpio_read (self->gdo1) == GPIO_STATE_HIGH)
+        ;
+
+    if (!spi_transfer_blocking (self->spi, tx_buffer, rx_buffer, 2))
+    {
+        gpio_write (self->cs, GPIO_STATE_HIGH);
+        return false;
+    }
+    
+    gpio_write (self->cs, GPIO_STATE_HIGH);
+
+    //marcstate_byte = rx_buffer [0];
+
+    return true;   
+}
+
 bool cc1101_write_burst (cc1101_t * self, uint8_t address, uint8_t value);
 bool cc1101_read_burst (cc1101_t * self, uint8_t address, uint8_t * value);
